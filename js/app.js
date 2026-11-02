@@ -15,9 +15,36 @@ const beroepSelectEl = document.querySelector('#beroep-select');
 const infoKnopEl = document.querySelector('#info-knop');
 const infoEl = document.querySelector('#info');
 
+// Welke scholen uitgeklapt zijn, onthouden we in de browser (standaard is alles ingeklapt).
+const OPEN_SLEUTEL = 'povo-open-scholen';
+
+function laadOpenScholen() {
+  try {
+    const lijst = JSON.parse(localStorage.getItem(OPEN_SLEUTEL) || '[]');
+    return new Set(Array.isArray(lijst) ? lijst : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function bewaarOpenScholen() {
+  try {
+    localStorage.setItem(OPEN_SLEUTEL, JSON.stringify([...staat.openScholen]));
+  } catch {
+    // opslag niet beschikbaar (bijv. privévenster): de stand geldt dan alleen tot je de pagina ververst
+  }
+}
+
+function zetSchoolOpen(id, open) {
+  if (open === staat.openScholen.has(id)) return;
+  if (open) staat.openScholen.add(id);
+  else staat.openScholen.delete(id);
+  bewaarOpenScholen();
+}
+
 const staat = {
   gekozen: null, plaats: null, scholen: [], omschrijvingen: {}, demo: false,
-  beroepen: [], beroep: null, route: 0, alleenTweetalig: false,
+  beroepen: [], beroep: null, route: 0, alleenTweetalig: false, openScholen: laadOpenScholen(),
 };
 
 // ---------- Hulpfuncties ----------
@@ -217,31 +244,41 @@ function tekenScholen(id) {
     const brugklassen = s.brugklassen || [];
     const niveaus = SCHOOL_NIVEAU_VOLGORDE.filter((n) => s.niveaus.includes(n));
     return h('li', { class: 'school' },
-      h('strong', {}, s.naam),
-      h('span', { class: 'plaats' }, s.plaats),
-      s.tweetalig && h('span', { class: 'tag-tweetalig' }, 'Tweetalig onderwijs'),
-      s.adres && h('span', { class: 'adres' }, s.adres),
-      brugklassen.length > 0 && h('div', { class: 'sectie' },
-        h('h4', { class: 'sectie-titel' }, 'Brugklas'),
-        h('ul', { class: 'brugklassen' },
-          ...brugklassen.map((b) => {
-            const { combinatie, duur } = brugklasDelen(b.niveaus, b.jaren);
-            return h('li', { class: b.niveaus.some((n) => relevant.has(n)) ? 'bk bk-hier' : 'bk' },
-              h('span', { class: 'bk-naam' }, combinatie),
-              duur && h('span', { class: 'bk-duur' }, duur));
-          }))),
-      niveaus.length > 0 && h('div', { class: 'sectie' },
-        h('h4', { class: 'sectie-titel' }, 'Niveaus'),
-        h('ul', { class: 'niveau-chips' },
-          ...niveaus.map((n) => h('li', {
-            class: relevant.has(n) ? 'niveau-chip hier' : 'niveau-chip',
-            style: `--kleur: ${NIVEAU_INFO[n].kleur}`,
-          }, NIVEAU_INFO[n].kort)))),
-      s.informatie && h('details', { class: 'meer' },
-        h('summary', {}, 'Meer informatie'),
-        h('p', { class: 'meer-tekst' }, s.informatie)),
-      url && h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, 'Website'));
+      h('details', {
+        class: 'school-details',
+        open: staat.openScholen.has(s.id),
+        ontoggle: (e) => zetSchoolOpen(s.id, e.target.open),
+      },
+      h('summary', {},
+        h('strong', {}, s.naam),
+        s.tweetalig && h('span', { class: 'tag-tweetalig' }, 'Tweetalig'),
+        h('span', { class: 'plaats' }, s.plaats)),
+      h('div', { class: 'school-body' },
+        s.adres && h('span', { class: 'adres' }, s.adres),
+        brugklassen.length > 0 && h('div', { class: 'sectie' },
+          h('h4', { class: 'sectie-titel' }, 'Brugklas'),
+          h('ul', { class: 'brugklassen' },
+            ...brugklassen.map((b) => {
+              const { combinatie, duur } = brugklasDelen(b.niveaus, b.jaren);
+              return h('li', { class: b.niveaus.some((n) => relevant.has(n)) ? 'bk bk-hier' : 'bk' },
+                h('span', { class: 'bk-naam' }, combinatie),
+                duur && h('span', { class: 'bk-duur' }, duur));
+            }))),
+        niveaus.length > 0 && h('div', { class: 'sectie' },
+          h('h4', { class: 'sectie-titel' }, 'Niveaus'),
+          h('ul', { class: 'niveau-chips' },
+            ...niveaus.map((n) => h('li', {
+              class: relevant.has(n) ? 'niveau-chip hier' : 'niveau-chip',
+              style: `--kleur: ${NIVEAU_INFO[n].kleur}`,
+            }, NIVEAU_INFO[n].kort)))),
+        s.informatie && h('details', { class: 'meer' },
+          h('summary', {}, 'Meer informatie'),
+          h('p', { class: 'meer-tekst' }, s.informatie)),
+        url && h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, 'Website'))));
   });
+
+  // Alles in één keer uit- of inklappen.
+  const allesOpen = getoond.length > 0 && getoond.every((sch) => staat.openScholen.has(sch.id));
 
   return h('div', { class: 'scholen' },
     h('div', { class: 'scholen-kop' },
@@ -259,7 +296,15 @@ function tekenScholen(id) {
       heeftTweetalig && h('button', {
         type: 'button', class: 'filter filter-tweetalig', 'aria-pressed': String(filterTweetalig),
         onclick: () => { staat.alleenTweetalig = !staat.alleenTweetalig; tekenPaneel(); },
-      }, 'Tweetalig')),
+      }, 'Tweetalig'),
+      getoond.length > 1 && h('button', {
+        type: 'button', class: 'alles-knop',
+        onclick: () => {
+          getoond.forEach((sch) => (allesOpen ? staat.openScholen.delete(sch.id) : staat.openScholen.add(sch.id)));
+          bewaarOpenScholen();
+          tekenPaneel();
+        },
+      }, allesOpen ? 'Alles inklappen' : 'Alles uitklappen')),
     getoond.length > 0
       ? h('ul', { class: 'school-lijst' }, ...kaarten)
       : h('p', { class: 'leeg' }, 'Hier zijn nog geen scholen ingevoerd.'));

@@ -226,22 +226,60 @@ body.start {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 .school {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  padding: 8px 12px;
   border: 1px solid var(--lijn);
   border-radius: 10px;
   background: var(--achtergrond);
+  overflow: hidden;
 }
-.school .plaats { color: var(--tekst-zacht); font-size: .9rem; }
-.school .adres { color: var(--tekst-zacht); font-size: .8rem; }
-.school > a { font-size: .85rem; margin-top: 10px; }
+.school-details > summary {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  padding: 10px 12px 10px 34px;
+  list-style: none;
+  cursor: pointer;
+}
+.school-details > summary::-webkit-details-marker { display: none; }
+.school-details > summary::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--tekst-zacht);
+  border-bottom: 2px solid var(--tekst-zacht);
+  transform: translateY(-65%) rotate(-45deg);
+  transition: transform .15s;
+}
+.school-details[open] > summary::before { transform: translateY(-35%) rotate(45deg); }
+.school-details > summary:hover { background: #e7ebf4; }
+.school-details > summary .plaats { margin-left: auto; color: var(--tekst-zacht); font-size: .9rem; }
+.school-details > summary .tag-tweetalig { margin: 0; }
+.school-body { padding: 0 12px 12px 34px; }
+.school .adres { display: block; color: var(--tekst-zacht); font-size: .8rem; }
+.school-body > a { display: inline-block; font-size: .85rem; margin-top: 10px; }
+.alles-knop {
+  margin-left: auto;
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--tekst-zacht);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.alles-knop:hover { color: var(--tekst); }
 .tag-tweetalig {
   align-self: flex-start;
   margin: 3px 0 2px;
