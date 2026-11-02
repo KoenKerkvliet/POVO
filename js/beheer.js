@@ -10,7 +10,7 @@ const uitlogKnop = document.querySelector('#uitloggen');
 
 const sb = SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-const staat = { tab: 'scholen', scholen: [], teksten: {}, beroepen: [], beroepenFout: null, zoek: '', ingelogd: null };
+const staat = { tab: 'scholen', scholen: [], teksten: {}, beroepen: [], beroepenFout: null, zoek: '', ingelogd: null, heeftInformatie: true, heeftTweetalig: true };
 
 // Welke niveaus je bij een school kunt aanvinken.
 const KEUZES = [
@@ -75,12 +75,18 @@ function toonInloggen() {
 // ---------- Gegevens ----------
 
 async function laadScholen() {
-  const { data, error } = await sb
-    .from('scholen')
-    .select('id,naam,plaats,adres,website,school_niveaus(niveau_id)')
-    .order('plaats').order('naam');
+  // 'informatie' en 'tweetalig' zijn later toegevoegd: ontbreekt een kolom nog, dan werkt het beheer zonder dat veld.
+  const bestaat = async (kolom) => !(await sb.from('scholen').select(kolom).limit(1)).error;
+  [staat.heeftInformatie, staat.heeftTweetalig] = await Promise.all([bestaat('informatie'), bestaat('tweetalig')]);
+
+  const { data, error } = await sb.from('scholen').select('*,school_niveaus(niveau_id)').order('plaats').order('naam');
   if (error) throw error;
-  staat.scholen = data.map((s) => ({ ...s, niveaus: s.school_niveaus.map((n) => n.niveau_id) }));
+  staat.scholen = data.map((s) => ({
+    ...s,
+    informatie: s.informatie || '',
+    tweetalig: Boolean(s.tweetalig),
+    niveaus: s.school_niveaus.map((n) => n.niveau_id),
+  }));
 }
 
 async function laadTeksten() {
@@ -151,7 +157,7 @@ function tekenScholen() {
   });
 
   const rijen = zichtbaar.map((s) => h('tr', {},
-    h('td', {}, h('strong', {}, s.naam)),
+    h('td', {}, h('strong', {}, s.naam), s.tweetalig && h('span', { class: 'tag-tweetalig' }, 'tweetalig')),
     h('td', {}, s.plaats),
     h('td', { class: 'niveaus' }, s.niveaus.length ? volgordeNiveaus(s.niveaus).map((n) => KORT[n]).join(', ') : 'geen niveau gekozen'),
     h('td', { class: 'actie' }, h('button', { type: 'button', class: 'knop zacht', onclick: () => openFormulier(s) }, 'Bewerken'))));
@@ -174,6 +180,29 @@ const volgordeNiveaus = (lijst) => [...lijst].sort((a, b) => NIVEAU_VOLGORDE.ind
 function sluit(dialoog) {
   dialoog.close();
   dialoog.remove();
+}
+
+// Keuzevakje voor tweetalig onderwijs (tto).
+function tweetaligVeld(school) {
+  if (!staat.heeftTweetalig) {
+    return [h('p', { class: 'hint' }, 'De keuze "Tweetalig onderwijs" is er nog niet: voer supabase/schema.sql opnieuw uit in Supabase.')];
+  }
+  return [h('label', { class: 'vink', style: 'margin-top:14px' },
+    h('input', { type: 'checkbox', id: 'f-tweetalig', checked: Boolean(school?.tweetalig) }),
+    'Deze school biedt tweetalig onderwijs (tto) aan')];
+}
+
+// Vrij tekstveld voor extra informatie, bijvoorbeeld welke klassen een school heeft.
+function informatieVeld(school) {
+  if (!staat.heeftInformatie) {
+    return [h('p', { class: 'hint' }, 'Het veld "Meer informatie" is er nog niet: voer supabase/schema.sql opnieuw uit in Supabase.')];
+  }
+  const tekst = h('textarea', {
+    id: 'f-informatie', rows: 5,
+    placeholder: 'Bijvoorbeeld: welke klassen de school heeft, open dag, bijzonderheden...',
+  });
+  tekst.value = school?.informatie || '';
+  return [h('label', { for: 'f-informatie' }, 'Meer informatie (niet verplicht)'), tekst];
 }
 
 function openFormulier(school) {
@@ -213,9 +242,14 @@ function openFormulier(school) {
       if (websiteInvoer && !website) { melding('Dit websiteadres klopt niet.', true); return; }
       const gekozen = [...formulier.querySelectorAll('input[name="niveau"]:checked')].map((c) => c.value);
 
+      const informatie = formulier.querySelector('#f-informatie')?.value.trim();
+      const waarden = { naam, plaats, adres: adres || null, website: website || null };
+      if (staat.heeftInformatie) waarden.informatie = informatie || null;
+      if (staat.heeftTweetalig) waarden.tweetalig = formulier.querySelector('#f-tweetalig').checked;
+
       opslaan.disabled = true;
       try {
-        await bewaarSchool(school, { naam, plaats, adres: adres || null, website: website || null }, gekozen);
+        await bewaarSchool(school, waarden, gekozen);
         sluit(dialoog);
         melding(school ? 'School opgeslagen.' : 'School toegevoegd.');
         await laadScholen();
@@ -232,6 +266,8 @@ function openFormulier(school) {
   ...veld('f-plaats', 'Plaats', school?.plaats, 'text', { required: true }),
   ...veld('f-adres', 'Adres (niet verplicht)', school?.adres),
   ...veld('f-website', 'Website (niet verplicht)', school?.website, 'text', { placeholder: 'www.voorbeeld.nl' }),
+  ...tweetaligVeld(school),
+  ...informatieVeld(school),
   h('fieldset', {}, h('legend', {}, 'Dit niveau wordt aangeboden'), ...niveauVelden.flat()),
   h('div', { class: 'rij' },
     opslaan,

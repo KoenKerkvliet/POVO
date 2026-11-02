@@ -24,8 +24,16 @@ create table if not exists public.scholen (
   plaats        text not null,
   adres         text,
   website       text,
+  informatie    text,
+  tweetalig     boolean not null default false,
   aangemaakt_op timestamptz not null default now()
 );
+
+-- Voor wie schema.sql al eerder uitvoerde: voeg het vrije tekstveld 'informatie' toe.
+alter table public.scholen add column if not exists informatie text;
+
+-- Idem voor de keuze 'tweetalig onderwijs (tto)'.
+alter table public.scholen add column if not exists tweetalig boolean not null default false;
 
 -- Welke school welk niveau aanbiedt (een school kan er meerdere hebben).
 create table if not exists public.school_niveaus (

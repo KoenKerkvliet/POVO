@@ -17,7 +17,7 @@ const infoEl = document.querySelector('#info');
 
 const staat = {
   gekozen: null, plaats: null, scholen: [], omschrijvingen: {}, demo: false,
-  beroepen: [], beroep: null, route: 0,
+  beroepen: [], beroep: null, route: 0, alleenTweetalig: false,
 };
 
 // ---------- Hulpfuncties ----------
@@ -207,7 +207,9 @@ function tekenInfo(id) {
 function tekenScholen(id) {
   const alle = scholenVoor(id);
   const plaatsen = [...new Set(alle.map((s) => s.plaats))].sort((a, b) => a.localeCompare(b, 'nl'));
-  const getoond = staat.plaats ? alle.filter((s) => s.plaats === staat.plaats) : alle;
+  const heeftTweetalig = alle.some((s) => s.tweetalig);
+  const filterTweetalig = staat.alleenTweetalig && heeftTweetalig;
+  const getoond = alle.filter((s) => (!staat.plaats || s.plaats === staat.plaats) && (!filterTweetalig || s.tweetalig));
   const metLeerwegen = id === 'vmbo';
 
   const kaarten = getoond.map((s) => {
@@ -218,7 +220,11 @@ function tekenScholen(id) {
     return h('li', { class: 'school' },
       h('strong', {}, s.naam),
       h('span', { class: 'plaats' }, s.plaats),
+      s.tweetalig && h('span', { class: 'tag-tweetalig' }, 'Tweetalig onderwijs'),
       s.adres && h('span', { class: 'adres' }, s.adres),
+      s.informatie && h('details', { class: 'meer' },
+        h('summary', {}, 'Meer informatie'),
+        h('p', { class: 'meer-tekst' }, s.informatie)),
       leerwegen && h('span', { class: 'leerwegen' }, leerwegen),
       url && h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, 'Website'));
   });
@@ -235,7 +241,11 @@ function tekenScholen(id) {
           h('button', {
             type: 'button', class: 'filter', 'aria-pressed': String(staat.plaats === p),
             onclick: () => { staat.plaats = staat.plaats === p ? null : p; tekenPaneel(); },
-          }, p)))),
+          }, p))),
+      heeftTweetalig && h('button', {
+        type: 'button', class: 'filter filter-tweetalig', 'aria-pressed': String(filterTweetalig),
+        onclick: () => { staat.alleenTweetalig = !staat.alleenTweetalig; tekenPaneel(); },
+      }, 'Tweetalig')),
     getoond.length > 0
       ? h('ul', { class: 'school-lijst' }, ...kaarten)
       : h('p', { class: 'leeg' }, 'Hier zijn nog geen scholen ingevoerd.'));

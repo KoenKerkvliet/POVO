@@ -204,9 +204,9 @@ export const DEMO_SCHOLEN = [
   { id: 'd1', naam: 'Voorbeeldschool Pr.o.', plaats: 'Heerlen', adres: '', website: '', niveaus: ['pro'] },
   { id: 'd2', naam: 'Voorbeeld Praktijkschool', plaats: 'Maastricht', adres: '', website: '', niveaus: ['pro', 'vmbo-bbl'] },
   { id: 'd3', naam: 'Voorbeeld Vakcollege', plaats: 'Sittard', adres: '', website: '', niveaus: ['vmbo-bbl', 'vmbo-kbl', 'vmbo-gl'] },
-  { id: 'd4', naam: 'Voorbeeld Scholengemeenschap', plaats: 'Maastricht', adres: '', website: '', niveaus: ['vmbo-gl', 'vmbo-tl', 'havo', 'vwo'] },
+  { id: 'd4', naam: 'Voorbeeld Scholengemeenschap', plaats: 'Maastricht', adres: '', website: '', informatie: 'Brugklassen: gl/tl, havo/vwo en vwo.\nOpen dag in januari.', tweetalig: true, niveaus: ['vmbo-gl', 'vmbo-tl', 'havo', 'vwo'] },
   { id: 'd5', naam: 'Voorbeeld College', plaats: 'Heerlen', adres: '', website: '', niveaus: ['vmbo-tl', 'havo', 'vwo'] },
-  { id: 'd6', naam: 'Voorbeeld Lyceum', plaats: 'Kerkrade', adres: '', website: '', niveaus: ['havo', 'vwo'] },
+  { id: 'd6', naam: 'Voorbeeld Lyceum', plaats: 'Kerkrade', adres: '', website: '', tweetalig: true, niveaus: ['havo', 'vwo'] },
   { id: 'd7', naam: 'Voorbeeld Atheneum', plaats: 'Geleen', adres: '', website: '', niveaus: ['vwo'] },
 ];
 

@@ -243,6 +243,21 @@ body.start {
 .school .adres, .school .leerwegen { color: var(--tekst-zacht); font-size: .8rem; }
 .school .leerwegen { font-weight: 700; }
 .school a { font-size: .85rem; margin-top: 2px; }
+.tag-tweetalig {
+  align-self: flex-start;
+  margin: 3px 0 2px;
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #075985;
+  font-size: .75rem;
+  font-weight: 700;
+}
+.filter-tweetalig { border-color: #0284c7; color: #075985; }
+.filter-tweetalig[aria-pressed="true"] { background: #075985; border-color: #075985; color: #fff; }
+.school .meer { margin-top: 4px; font-size: .85rem; }
+.school .meer summary { cursor: pointer; font-weight: 600; color: var(--tekst); }
+.school .meer-tekst { margin: 4px 0 0 !important; white-space: pre-line; color: var(--tekst-zacht); }
 
 .leeg, .demo, .fout { color: var(--tekst-zacht); font-size: .9rem; }
 .demo {

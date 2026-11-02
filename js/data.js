@@ -12,13 +12,14 @@ async function haal(pad) {
   return antwoord.json();
 }
 
-// Geeft { scholen: [{id, naam, plaats, adres, website, niveaus: [id]}], beroepen: [{id, naam, omschrijving, routes: [{id, stappen}]}],
+// Geeft { scholen: [{id, naam, plaats, adres, website, informatie, tweetalig, niveaus: [id]}], beroepen: [{id, naam, omschrijving, routes: [{id, stappen}]}],
 //         omschrijvingen: {id: tekst}, demo: boolean }
 export async function laadGegevens() {
   if (!IS_GEKOPPELD) return { scholen: DEMO_SCHOLEN, beroepen: DEMO_BEROEPEN, omschrijvingen: {}, demo: true };
 
+  // select=* neemt alle kolommen mee die er zijn, ook als er later velden (informatie, tweetalig) bij komen.
   const [scholen, niveaus] = await Promise.all([
-    haal('scholen?select=id,naam,plaats,adres,website,school_niveaus(niveau_id)&order=plaats.asc,naam.asc'),
+    haal('scholen?select=*,school_niveaus(niveau_id)&order=plaats.asc,naam.asc'),
     haal('niveaus?select=id,omschrijving'),
   ]);
 
@@ -39,6 +40,8 @@ export async function laadGegevens() {
       naam: s.naam,
       plaats: s.plaats,
       adres: s.adres || '',
+      informatie: s.informatie || '',
+      tweetalig: Boolean(s.tweetalig),
       website: s.website || '',
       niveaus: s.school_niveaus.map((n) => n.niveau_id),
     })),
