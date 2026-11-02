@@ -56,6 +56,7 @@ insert into public.niveaus (id, naam, heeft_scholen, volgorde) values
   ('vmbo-tl',     'Vmbo - theoretische leerweg (mavo)',       true,   7),
   ('havo',        'Havo',                                     true,   8),
   ('vwo',         'Vwo',                                      true,   9),
+  ('gymnasium',   'Gymnasium (vwo met Latijn en Grieks)',     true,  18),
   ('mbo',         'Mbo',                                      false, 10),
   ('mbo1',        'Mbo niveau 1',                             false, 11),
   ('mbo2',        'Mbo niveau 2',                             false, 12),

@@ -134,6 +134,7 @@ export const PIJLEN = [
 // Groepen: klik je op het vmbo of de mbo-balk, dan tellen de onderdelen mee.
 export const GROEPEN = {
   vmbo: ['vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl'],
+  vwo: ['vwo', 'gymnasium'], // het gymnasium is een vwo: scholen met gymnasium horen ook bij vwo
   mbo: ['mbo1', 'mbo2', 'mbo3', 'mbo4'],
 };
 
@@ -148,6 +149,7 @@ export const NIVEAU_INFO = {
   'vmbo-tl': { naam: 'Vmbo - theoretische leerweg (tl / mavo)', kort: 'vmbo tl', duur: '4 jaar', kleur: KLEUREN.vmbo },
   havo: { naam: 'Havo', kort: 'havo', duur: '5 jaar', kleur: KLEUREN.havo },
   vwo: { naam: 'Vwo', kort: 'vwo', duur: '6 jaar', kleur: KLEUREN.vwo },
+  gymnasium: { naam: 'Gymnasium', kort: 'gymnasium', duur: '6 jaar', kleur: KLEUREN.vwo },
   mbo: { naam: 'Mbo', kort: 'mbo', duur: '1 tot 4 jaar', kleur: KLEUREN.mbo },
   mbo1: { naam: 'Mbo niveau 1', kort: 'mbo niveau 1', duur: 'ongeveer 1 jaar', kleur: KLEUREN.mbo },
   mbo2: { naam: 'Mbo niveau 2', kort: 'mbo niveau 2', duur: 'ongeveer 2 jaar', kleur: KLEUREN.mbo },
@@ -178,6 +180,8 @@ export const STANDAARD_OMSCHRIJVING = {
     'De havo duurt 5 jaar. Je volgt algemene vakken en leert veel zelf plannen en uitzoeken. Daarna kun je naar het hbo, naar mbo niveau 4 of doorstromen naar het vwo.',
   vwo:
     'Het vwo duurt 6 jaar. Je volgt algemene vakken en leert veel over onderzoeken en uitzoeken. Op het gymnasium leer je ook Latijn en Grieks. Daarna kun je naar de universiteit of naar het hbo.',
+  gymnasium:
+    'Het gymnasium is vwo, met daarbij Latijn en Grieks. Het duurt 6 jaar. Daarna kun je naar de universiteit of naar het hbo.',
   mbo:
     'Het mbo is een opleiding voor een beroep, met veel praktijk en stages. Er zijn vier niveaus. Het niveau zegt niets over hoe goed je bent: het gaat over hoe breed en zelfstandig je later werkt. Elk niveau leidt op voor een echt beroep.',
   mbo1:
@@ -197,7 +201,7 @@ export const STANDAARD_OMSCHRIJVING = {
 };
 
 // Niveaus waarvoor scholen worden getoond.
-export const MET_SCHOLEN = ['pro', 'vmbo', 'vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl', 'havo', 'vwo'];
+export const MET_SCHOLEN = ['pro', 'vmbo', 'vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl', 'havo', 'vwo', 'gymnasium'];
 
 // Voorbeeldscholen, alleen zichtbaar zolang Supabase nog niet is gekoppeld.
 export const DEMO_SCHOLEN = [
@@ -258,7 +262,7 @@ export const DEMO_BEROEPEN = [
 // ---------- Brugklassen ----------
 
 // Niveaus waaruit een (brede) brugklas kan bestaan, in vaste volgorde.
-export const BRUGKLAS_NIVEAUS = ['vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl', 'havo', 'vwo'];
+export const BRUGKLAS_NIVEAUS = ['vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl', 'havo', 'vwo', 'gymnasium'];
 
 // Snelle keuzes voor veelvoorkomende combinaties.
 export const BRUGKLAS_VOORBEELDEN = [
@@ -268,6 +272,7 @@ export const BRUGKLAS_VOORBEELDEN = [
   ['vmbo-tl', 'havo'],
   ['havo', 'vwo'],
   ['vmbo-tl', 'havo', 'vwo'],
+  ['vwo', 'gymnasium'],
 ];
 
 const brugklasKort = (id) => (NIVEAU_INFO[id]?.kort || id).replace('vmbo ', '');

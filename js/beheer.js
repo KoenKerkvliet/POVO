@@ -13,7 +13,8 @@ const uitlogKnop = document.querySelector('#uitloggen');
 
 const sb = SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-const staat = { tab: 'scholen', scholen: [], teksten: {}, beroepen: [], beroepenFout: null, zoek: '', ingelogd: null, heeftInformatie: true, heeftTweetalig: true, heeftBrugklassen: true };
+const staat = { tab: 'scholen', scholen: [], teksten: {}, beroepen: [], beroepenFout: null, zoek: '', ingelogd: null, heeftInformatie: true, heeftTweetalig: true, heeftBrugklassen: true,
+  niveausInDb: new Set() };
 
 // Welke niveaus je bij een school kunt aanvinken.
 const KEUZES = [
@@ -21,7 +22,11 @@ const KEUZES = [
   { groep: 'Vmbo', leden: LEERWEGEN.map((lw) => ({ id: lw.id, label: NIVEAU_INFO[lw.id].naam.replace('Vmbo - ', '') })) },
   { id: 'havo', label: 'Havo' },
   { id: 'vwo', label: 'Vwo' },
+  { id: 'gymnasium', label: 'Gymnasium' },
 ];
+
+// Het gymnasium kan pas gekozen worden als het niveau in de database staat (schema.sql opnieuw uitvoeren).
+const beschikbaar = (id) => id !== 'gymnasium' || staat.niveausInDb.has('gymnasium');
 const KORT = Object.fromEntries(Object.entries(NIVEAU_INFO).map(([id, i]) => [id, i.kort]));
 
 let meldingTimer;
@@ -103,6 +108,7 @@ async function laadTeksten() {
   const { data, error } = await sb.from('niveaus').select('id,omschrijving');
   if (error) throw error;
   staat.teksten = Object.fromEntries(data.map((n) => [n.id, n.omschrijving || '']));
+  staat.niveausInDb = new Set(data.map((n) => n.id));
 }
 
 async function laadBeroepen() {
@@ -186,7 +192,7 @@ function tekenScholen() {
         h('tbody', {}, ...rijen)));
 }
 
-const NIVEAU_VOLGORDE = ['pro', 'vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl', 'havo', 'vwo'];
+const NIVEAU_VOLGORDE = ['pro', 'vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl', 'havo', 'vwo', 'gymnasium'];
 const volgordeNiveaus = (lijst) => [...lijst].sort((a, b) => NIVEAU_VOLGORDE.indexOf(a) - NIVEAU_VOLGORDE.indexOf(b));
 
 function sluit(dialoog) {
@@ -240,7 +246,7 @@ function brugklassenEditor(school, dialoog) {
     lijst.replaceChildren(
       ...rijen.map((rij, i) => h('div', { class: 'brugklas-rij' },
         h('div', { class: 'keuze-chips', role: 'group', 'aria-label': `Brugklas ${i + 1}: niveaus` },
-          ...BRUGKLAS_NIVEAUS.map((id) => h('button', {
+          ...BRUGKLAS_NIVEAUS.filter(beschikbaar).map((id) => h('button', {
             type: 'button', class: 'keuze-chip', 'data-id': id, 'aria-pressed': String(rij.niveaus.includes(id)),
             onclick: () => {
               const erin = rij.niveaus.includes(id);
@@ -261,10 +267,10 @@ function brugklassenEditor(school, dialoog) {
       ...(rijen.length === 0 ? [h('p', { class: 'hint' }, 'Nog geen brugklassen ingevoerd.')] : []),
       h('div', { class: 'voorbeelden' },
         h('span', { class: 'hint' }, 'Eén niveau:'),
-        ...BRUGKLAS_NIVEAUS.map((id) => snelKnop([id]))),
+        ...BRUGKLAS_NIVEAUS.filter(beschikbaar).map((id) => snelKnop([id]))),
       h('div', { class: 'voorbeelden' },
         h('span', { class: 'hint' }, 'Combinatie:'),
-        ...BRUGKLAS_VOORBEELDEN.map(snelKnop),
+        ...BRUGKLAS_VOORBEELDEN.filter((niveaus) => niveaus.every(beschikbaar)).map(snelKnop),
         h('button', {
           type: 'button', class: 'knop zacht klein',
           onclick: () => { rijen.push({ niveaus: [], jaren: 2 }); teken(); },
@@ -289,7 +295,7 @@ function openFormulier(school) {
   const vink = (id, label, sub = false) => h('label', { class: `vink${sub ? ' sub' : ''}` },
     h('input', { type: 'checkbox', name: 'niveau', value: id, checked: bestaand.has(id) }), label);
 
-  const niveauVelden = KEUZES.map((k) => k.groep
+  const niveauVelden = KEUZES.filter((k) => k.groep || beschikbaar(k.id)).map((k) => k.groep
     ? [
       h('label', { class: 'vink' },
         h('input', {
@@ -348,7 +354,8 @@ function openFormulier(school) {
   ...veld('f-plaats', 'Plaats', school?.plaats, 'text', { required: true }),
   ...veld('f-adres', 'Adres (niet verplicht)', school?.adres),
   ...veld('f-website', 'Website (niet verplicht)', school?.website, 'text', { placeholder: 'www.voorbeeld.nl' }),
-  h('fieldset', {}, h('legend', {}, 'Dit niveau wordt aangeboden'), ...niveauVelden.flat()),
+  h('fieldset', {}, h('legend', {}, 'Dit niveau wordt aangeboden'), ...niveauVelden.flat(),
+    ...(beschikbaar('gymnasium') ? [] : [h('p', { class: 'hint' }, 'Gymnasium kun je kiezen nadat je supabase/schema.sql opnieuw hebt uitgevoerd.')])),
   brugklassen
     ? h('fieldset', {},
       h('legend', {}, 'Brugklassen'),
