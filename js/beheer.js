@@ -230,6 +230,12 @@ function brugklassenEditor(school, dialoog) {
     if (vak) vak.checked = true;
   };
 
+  // Knop die in één klik een brugklas met deze niveaus toevoegt.
+  const snelKnop = (niveaus) => h('button', {
+    type: 'button', class: 'knop zacht klein',
+    onclick: () => { rijen.push({ niveaus: [...niveaus], jaren: 2 }); niveaus.forEach(vinkNiveauAan); teken(); },
+  }, niveaus.map(bkKort).join('/'));
+
   function teken(focus) {
     lijst.replaceChildren(
       ...rijen.map((rij, i) => h('div', { class: 'brugklas-rij' },
@@ -254,11 +260,11 @@ function brugklassenEditor(school, dialoog) {
         }, 'Verwijderen'))),
       ...(rijen.length === 0 ? [h('p', { class: 'hint' }, 'Nog geen brugklassen ingevoerd.')] : []),
       h('div', { class: 'voorbeelden' },
-        h('span', { class: 'hint' }, 'Snel toevoegen:'),
-        ...BRUGKLAS_VOORBEELDEN.map((niveaus) => h('button', {
-          type: 'button', class: 'knop zacht klein',
-          onclick: () => { rijen.push({ niveaus: [...niveaus], jaren: 2 }); niveaus.forEach(vinkNiveauAan); teken(); },
-        }, niveaus.map(bkKort).join('/'))),
+        h('span', { class: 'hint' }, 'Eén niveau:'),
+        ...BRUGKLAS_NIVEAUS.map((id) => snelKnop([id]))),
+      h('div', { class: 'voorbeelden' },
+        h('span', { class: 'hint' }, 'Combinatie:'),
+        ...BRUGKLAS_VOORBEELDEN.map(snelKnop),
         h('button', {
           type: 'button', class: 'knop zacht klein',
           onclick: () => { rijen.push({ niveaus: [], jaren: 2 }); teken(); },
