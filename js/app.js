@@ -4,7 +4,7 @@ import { laadGegevens } from './data.js';
 import { h, svg, veiligeUrl } from './dom.js';
 import {
   BLOKKEN, VMBO, MBO, LEERWEGEN, MBO_NIVEAUS, PIJLEN, GROEPEN,
-  JAAR_PX, GROND_Y, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, MET_SCHOLEN, brugklasLabel,
+  JAAR_PX, GROND_Y, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, MET_SCHOLEN, brugklasDelen, SCHOOL_NIVEAU_VOLGORDE,
   leerwegGeometrie, mboGeometrie, hoekVan, SCHEMA_VIEWBOX,
 } from './schema-data.js';
 
@@ -210,25 +210,36 @@ function tekenScholen(id) {
   const heeftTweetalig = alle.some((s) => s.tweetalig);
   const filterTweetalig = staat.alleenTweetalig && heeftTweetalig;
   const getoond = alle.filter((s) => (!staat.plaats || s.plaats === staat.plaats) && (!filterTweetalig || s.tweetalig));
-  const metLeerwegen = id === 'vmbo';
-  const relevant = new Set(leden(id)); // alleen brugklassen tonen die bij dit niveau horen
+  const relevant = new Set(leden(id)); // het aangeklikte niveau komt in de kaart extra naar voren
 
   const kaarten = getoond.map((s) => {
     const url = veiligeUrl(s.website);
-    const leerwegen = metLeerwegen
-      ? LEERWEGEN.filter((lw) => s.niveaus.includes(lw.id)).map((lw) => lw.kort).join(' · ')
-      : '';
+    const brugklassen = s.brugklassen || [];
+    const niveaus = SCHOOL_NIVEAU_VOLGORDE.filter((n) => s.niveaus.includes(n));
     return h('li', { class: 'school' },
       h('strong', {}, s.naam),
       h('span', { class: 'plaats' }, s.plaats),
       s.tweetalig && h('span', { class: 'tag-tweetalig' }, 'Tweetalig onderwijs'),
-      ...(s.brugklassen || []).filter((b) => b.niveaus.some((n) => relevant.has(n)))
-        .map((b) => h('span', { class: 'brugklas' }, brugklasLabel(b.niveaus, b.jaren))),
       s.adres && h('span', { class: 'adres' }, s.adres),
+      brugklassen.length > 0 && h('div', { class: 'sectie' },
+        h('h4', { class: 'sectie-titel' }, 'Brugklas'),
+        h('ul', { class: 'brugklassen' },
+          ...brugklassen.map((b) => {
+            const { combinatie, duur } = brugklasDelen(b.niveaus, b.jaren);
+            return h('li', { class: b.niveaus.some((n) => relevant.has(n)) ? 'bk bk-hier' : 'bk' },
+              h('span', { class: 'bk-naam' }, combinatie),
+              duur && h('span', { class: 'bk-duur' }, duur));
+          }))),
+      niveaus.length > 0 && h('div', { class: 'sectie' },
+        h('h4', { class: 'sectie-titel' }, 'Niveaus'),
+        h('ul', { class: 'niveau-chips' },
+          ...niveaus.map((n) => h('li', {
+            class: relevant.has(n) ? 'niveau-chip hier' : 'niveau-chip',
+            style: `--kleur: ${NIVEAU_INFO[n].kleur}`,
+          }, NIVEAU_INFO[n].kort)))),
       s.informatie && h('details', { class: 'meer' },
         h('summary', {}, 'Meer informatie'),
         h('p', { class: 'meer-tekst' }, s.informatie)),
-      leerwegen && h('span', { class: 'leerwegen' }, leerwegen),
       url && h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, 'Website'));
   });
 

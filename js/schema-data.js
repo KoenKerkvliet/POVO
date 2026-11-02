@@ -272,9 +272,17 @@ export const BRUGKLAS_VOORBEELDEN = [
 
 const brugklasKort = (id) => (NIVEAU_INFO[id]?.kort || id).replace('vmbo ', '');
 
+// Delen van een brugklas: de combinatie ("tl/havo") en bij een brede brugklas de duur ("2 jaar").
+export function brugklasDelen(niveaus, jaren) {
+  const volgorde = [...niveaus].sort((a, b) => BRUGKLAS_NIVEAUS.indexOf(a) - BRUGKLAS_NIVEAUS.indexOf(b));
+  return { combinatie: volgorde.map(brugklasKort).join('/'), duur: niveaus.length > 1 ? `${jaren} jaar` : '' };
+}
+
 // Bijvoorbeeld "Brede brugklas tl/havo (2 jaar)" of "Brugklas vwo".
 export function brugklasLabel(niveaus, jaren) {
-  const volgorde = [...niveaus].sort((a, b) => BRUGKLAS_NIVEAUS.indexOf(a) - BRUGKLAS_NIVEAUS.indexOf(b));
-  const tekst = volgorde.map(brugklasKort).join('/');
-  return niveaus.length > 1 ? `Brede brugklas ${tekst} (${jaren} jaar)` : `Brugklas ${tekst}`;
+  const { combinatie, duur } = brugklasDelen(niveaus, jaren);
+  return duur ? `Brede brugklas ${combinatie} (${duur})` : `Brugklas ${combinatie}`;
 }
+
+// Volgorde waarin de niveaus van een school getoond worden.
+export const SCHOOL_NIVEAU_VOLGORDE = ['pro', ...BRUGKLAS_NIVEAUS];
