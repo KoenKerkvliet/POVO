@@ -199,6 +199,41 @@ body.start {
 
 /* ---------- Scholen ---------- */
 
+.scholen-sectie > summary {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0 6px 24px;
+  list-style: none;
+  cursor: pointer;
+}
+.scholen-sectie > summary::-webkit-details-marker { display: none; }
+.scholen-sectie > summary::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2.5px solid var(--tekst-zacht);
+  border-bottom: 2.5px solid var(--tekst-zacht);
+  transform: translateY(-65%) rotate(-45deg);
+  transition: transform .15s;
+}
+.scholen-sectie[open] > summary::before { transform: translateY(-35%) rotate(45deg); }
+.scholen-sectie > summary::after {
+  content: "Tonen";
+  margin-left: auto;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--tekst-zacht);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.scholen-sectie[open] > summary::after { content: "Verbergen"; }
+.scholen-sectie > summary:hover::after { color: var(--tekst); }
+.scholen-sectie[open] > summary { margin-bottom: 8px; }
 .scholen-kop { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 10px; }
 .scholen h3 { margin: 0; font-size: 1.05rem; }
 .aantal {

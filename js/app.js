@@ -35,6 +35,27 @@ function bewaarOpenScholen() {
   }
 }
 
+// Of de hele sectie 'Scholen' uitgeklapt is (standaard dicht, zodat de kaart de aandacht krijgt).
+const SECTIE_SLEUTEL = 'povo-scholen-sectie-open';
+
+function laadScholenSectieOpen() {
+  try {
+    return localStorage.getItem(SECTIE_SLEUTEL) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function zetScholenSectieOpen(open) {
+  if (open === staat.scholenOpen) return;
+  staat.scholenOpen = open;
+  try {
+    localStorage.setItem(SECTIE_SLEUTEL, open ? '1' : '0');
+  } catch {
+    // opslag niet beschikbaar: de stand geldt dan alleen tot je de pagina ververst
+  }
+}
+
 function zetSchoolOpen(id, open) {
   if (open === staat.openScholen.has(id)) return;
   if (open) staat.openScholen.add(id);
@@ -44,7 +65,7 @@ function zetSchoolOpen(id, open) {
 
 const staat = {
   gekozen: null, plaats: null, scholen: [], omschrijvingen: {}, demo: false,
-  beroepen: [], beroep: null, route: 0, alleenTweetalig: false, openScholen: laadOpenScholen(),
+  beroepen: [], beroep: null, route: 0, alleenTweetalig: false, openScholen: laadOpenScholen(), scholenOpen: laadScholenSectieOpen(),
 };
 
 // ---------- Hulpfuncties ----------
@@ -281,8 +302,15 @@ function tekenScholen(id) {
   const allesOpen = getoond.length > 0 && getoond.every((sch) => staat.openScholen.has(sch.id));
 
   return h('div', { class: 'scholen' },
+    h('details', {
+      class: 'scholen-sectie',
+      open: staat.scholenOpen,
+      ontoggle: (e) => zetScholenSectieOpen(e.target.open),
+    },
+    h('summary', {},
+      h('h3', {}, `Scholen in ${REGIO}`),
+      h('span', { class: 'aantal' }, String(getoond.length))),
     h('div', { class: 'scholen-kop' },
-      h('h3', {}, `Scholen in ${REGIO}`, h('span', { class: 'aantal' }, String(getoond.length))),
       plaatsen.length > 1 && h('div', { class: 'plaatsen', role: 'group', 'aria-label': 'Filter op plaats' },
         h('button', {
           type: 'button', class: 'filter', 'aria-pressed': String(!staat.plaats),
@@ -307,7 +335,7 @@ function tekenScholen(id) {
       }, allesOpen ? 'Alles inklappen' : 'Alles uitklappen')),
     getoond.length > 0
       ? h('ul', { class: 'school-lijst' }, ...kaarten)
-      : h('p', { class: 'leeg' }, 'Hier zijn nog geen scholen ingevoerd.'));
+      : h('p', { class: 'leeg' }, 'Hier zijn nog geen scholen ingevoerd.')));
 }
 
 // ---------- Beroepen ----------
