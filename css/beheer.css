@@ -134,3 +134,33 @@ code { background: #eef1f6; padding: 1px 5px; border-radius: 4px; }
 .pijltje { color: var(--tekst-zacht); font-weight: 700; }
 
 .tabel .tag-tweetalig { margin-left: 8px; }
+
+/* brugklassen invoeren */
+.brugklassen-editor { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.brugklas-rij {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--lijn);
+  border-radius: 10px;
+  background: var(--achtergrond);
+}
+.keuze-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.keuze-chip {
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 700;
+  padding: 3px 12px;
+  border: 1px solid #94a3b8;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--tekst);
+  cursor: pointer;
+}
+.keuze-chip[aria-pressed="true"] { background: var(--tekst); border-color: var(--tekst); color: #fff; }
+.brugklas-rij .jaren { display: flex; align-items: center; gap: 6px; margin: 0; font-size: .85rem; }
+.brugklas-rij .jaren select { font: inherit; padding: 3px 6px; border: 1px solid #94a3b8; border-radius: 8px; background: #fff; }
+.brugklas-rij .knop.gevaar { margin-left: auto; }
+.voorbeelden { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }

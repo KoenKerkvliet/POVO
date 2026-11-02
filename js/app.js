@@ -4,7 +4,7 @@ import { laadGegevens } from './data.js';
 import { h, svg, veiligeUrl } from './dom.js';
 import {
   BLOKKEN, VMBO, MBO, LEERWEGEN, MBO_NIVEAUS, PIJLEN, GROEPEN,
-  JAAR_PX, GROND_Y, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, MET_SCHOLEN,
+  JAAR_PX, GROND_Y, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, MET_SCHOLEN, brugklasLabel,
   leerwegGeometrie, mboGeometrie, hoekVan, SCHEMA_VIEWBOX,
 } from './schema-data.js';
 
@@ -211,6 +211,7 @@ function tekenScholen(id) {
   const filterTweetalig = staat.alleenTweetalig && heeftTweetalig;
   const getoond = alle.filter((s) => (!staat.plaats || s.plaats === staat.plaats) && (!filterTweetalig || s.tweetalig));
   const metLeerwegen = id === 'vmbo';
+  const relevant = new Set(leden(id)); // alleen brugklassen tonen die bij dit niveau horen
 
   const kaarten = getoond.map((s) => {
     const url = veiligeUrl(s.website);
@@ -221,6 +222,8 @@ function tekenScholen(id) {
       h('strong', {}, s.naam),
       h('span', { class: 'plaats' }, s.plaats),
       s.tweetalig && h('span', { class: 'tag-tweetalig' }, 'Tweetalig onderwijs'),
+      ...(s.brugklassen || []).filter((b) => b.niveaus.some((n) => relevant.has(n)))
+        .map((b) => h('span', { class: 'brugklas' }, brugklasLabel(b.niveaus, b.jaren))),
       s.adres && h('span', { class: 'adres' }, s.adres),
       s.informatie && h('details', { class: 'meer' },
         h('summary', {}, 'Meer informatie'),

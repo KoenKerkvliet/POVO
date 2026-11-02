@@ -14,7 +14,7 @@ Een interactief schema met de wegen na de basisschool. Klik op pr.o., vmbo (of e
 3. **Aanmelden van anderen uitzetten.** Supabase > Authentication > Sign In / Providers > zet *Allow new users to sign up* uit. (Schrijven mag sowieso alleen met jouw e-mailadres, dit is een extra slot.)
 4. **Sleutel invullen.** Supabase > Project Settings > API Keys: kopieer de *anon* (of *publishable*) key en plak die in `js/config.js` bij `SUPABASE_ANON_KEY`. Deze sleutel is bedoeld om openbaar te zijn.
 
-**Bijwerken van een bestaande database:** voer `supabase/schema.sql` opnieuw uit. Dat is veilig en verandert geen bestaande gegevens. Het voegt onder andere het tekstveld *Meer informatie* en het vinkje *Tweetalig onderwijs* bij scholen toe.
+**Bijwerken van een bestaande database:** voer `supabase/schema.sql` opnieuw uit. Dat is veilig en verandert geen bestaande gegevens. Het voegt onder andere het tekstveld *Meer informatie* en het vinkje *Tweetalig onderwijs* bij scholen toe, en de tabel voor *Brugklassen*.
 
 Zolang de sleutel leeg is, laat de website voorbeeldscholen en voorbeeldberoepen zien.
 

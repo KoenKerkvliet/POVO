@@ -2,7 +2,10 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
 import { SUPABASE_URL, SUPABASE_ANON_KEY, REGIO } from './config.js';
 import { h, veiligeUrl } from './dom.js';
-import { LEERWEGEN, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, START_OPTIES, volgendeStappen } from './schema-data.js';
+import {
+  LEERWEGEN, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, START_OPTIES, volgendeStappen,
+  BRUGKLAS_NIVEAUS, BRUGKLAS_VOORBEELDEN, brugklasLabel,
+} from './schema-data.js';
 
 const inhoud = document.querySelector('#inhoud');
 const meldingEl = document.querySelector('#melding');
@@ -10,7 +13,7 @@ const uitlogKnop = document.querySelector('#uitloggen');
 
 const sb = SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-const staat = { tab: 'scholen', scholen: [], teksten: {}, beroepen: [], beroepenFout: null, zoek: '', ingelogd: null, heeftInformatie: true, heeftTweetalig: true };
+const staat = { tab: 'scholen', scholen: [], teksten: {}, beroepen: [], beroepenFout: null, zoek: '', ingelogd: null, heeftInformatie: true, heeftTweetalig: true, heeftBrugklassen: true };
 
 // Welke niveaus je bij een school kunt aanvinken.
 const KEUZES = [
@@ -81,11 +84,18 @@ async function laadScholen() {
 
   const { data, error } = await sb.from('scholen').select('*,school_niveaus(niveau_id)').order('plaats').order('naam');
   if (error) throw error;
+
+  // Brugklassen staan in een eigen tabel; bestaat die nog niet, dan werkt het beheer zonder.
+  const bk = await sb.from('school_brugklassen').select('*').order('volgorde');
+  staat.heeftBrugklassen = !bk.error;
+  const brugklassen = bk.error ? [] : bk.data;
+
   staat.scholen = data.map((s) => ({
     ...s,
     informatie: s.informatie || '',
     tweetalig: Boolean(s.tweetalig),
     niveaus: s.school_niveaus.map((n) => n.niveau_id),
+    brugklassen: brugklassen.filter((b) => b.school_id === s.id).map((b) => ({ id: b.id, niveaus: b.niveaus, jaren: b.jaren })),
   }));
 }
 
@@ -159,7 +169,9 @@ function tekenScholen() {
   const rijen = zichtbaar.map((s) => h('tr', {},
     h('td', {}, h('strong', {}, s.naam), s.tweetalig && h('span', { class: 'tag-tweetalig' }, 'tweetalig')),
     h('td', {}, s.plaats),
-    h('td', { class: 'niveaus' }, s.niveaus.length ? volgordeNiveaus(s.niveaus).map((n) => KORT[n]).join(', ') : 'geen niveau gekozen'),
+    h('td', { class: 'niveaus' },
+      s.niveaus.length ? volgordeNiveaus(s.niveaus).map((n) => KORT[n]).join(', ') : 'geen niveau gekozen',
+      ...s.brugklassen.map((b) => h('div', {}, brugklasLabel(b.niveaus, b.jaren)))),
     h('td', { class: 'actie' }, h('button', { type: 'button', class: 'knop zacht', onclick: () => openFormulier(s) }, 'Bewerken'))));
 
   return h('section', { class: 'blok-kaart' },
@@ -205,6 +217,60 @@ function informatieVeld(school) {
   return [h('label', { for: 'f-informatie' }, 'Meer informatie (niet verplicht)'), tekst];
 }
 
+// Invoer van brugklassen: per brugklas kies je de niveaus (knoppen) en hoe lang de brede brugklas duurt.
+const bkKort = (id) => NIVEAU_INFO[id].kort.replace('vmbo ', '');
+
+function brugklassenEditor(school, dialoog) {
+  const rijen = (school?.brugklassen || []).map((b) => ({ niveaus: [...b.niveaus], jaren: b.jaren }));
+  const lijst = h('div', { class: 'brugklassen-editor' });
+
+  // Een niveau in een brugklas betekent dat de school dat niveau aanbiedt: vink het bovenaan alvast aan.
+  const vinkNiveauAan = (id) => {
+    const vak = dialoog.querySelector(`input[name="niveau"][value="${id}"]`);
+    if (vak) vak.checked = true;
+  };
+
+  function teken(focus) {
+    lijst.replaceChildren(
+      ...rijen.map((rij, i) => h('div', { class: 'brugklas-rij' },
+        h('div', { class: 'keuze-chips', role: 'group', 'aria-label': `Brugklas ${i + 1}: niveaus` },
+          ...BRUGKLAS_NIVEAUS.map((id) => h('button', {
+            type: 'button', class: 'keuze-chip', 'data-id': id, 'aria-pressed': String(rij.niveaus.includes(id)),
+            onclick: () => {
+              const erin = rij.niveaus.includes(id);
+              rij.niveaus = erin ? rij.niveaus.filter((n) => n !== id) : [...rij.niveaus, id];
+              if (!erin) vinkNiveauAan(id);
+              teken({ i, id });
+            },
+          }, bkKort(id)))),
+        rij.niveaus.length > 1 && h('label', { class: 'jaren' }, 'Duur',
+          h('select', { onchange: (e) => { rij.jaren = Number(e.target.value); } },
+            ...[...new Set([1, 2, rij.jaren])].sort().map((j) =>
+              h('option', { value: String(j), selected: rij.jaren === j }, `${j} jaar`)))),
+        h('button', {
+          type: 'button', class: 'knop gevaar klein',
+          'aria-label': `Verwijder brugklas ${i + 1}`,
+          onclick: () => { rijen.splice(i, 1); teken(); },
+        }, 'Verwijderen'))),
+      ...(rijen.length === 0 ? [h('p', { class: 'hint' }, 'Nog geen brugklassen ingevoerd.')] : []),
+      h('div', { class: 'voorbeelden' },
+        h('span', { class: 'hint' }, 'Snel toevoegen:'),
+        ...BRUGKLAS_VOORBEELDEN.map((niveaus) => h('button', {
+          type: 'button', class: 'knop zacht klein',
+          onclick: () => { rijen.push({ niveaus: [...niveaus], jaren: 2 }); niveaus.forEach(vinkNiveauAan); teken(); },
+        }, niveaus.map(bkKort).join('/'))),
+        h('button', {
+          type: 'button', class: 'knop zacht klein',
+          onclick: () => { rijen.push({ niveaus: [], jaren: 2 }); teken(); },
+        }, 'Eigen combinatie')));
+
+    if (focus) lijst.querySelectorAll('.brugklas-rij')[focus.i]?.querySelector(`[data-id="${focus.id}"]`)?.focus();
+  }
+
+  teken();
+  return { element: lijst, waarden: () => rijen };
+}
+
 function openFormulier(school) {
   const bestaand = new Set(school?.niveaus || []);
   const dialoog = h('dialog', { 'aria-labelledby': 'dialoog-titel' });
@@ -228,6 +294,7 @@ function openFormulier(school) {
     ]
     : vink(k.id, k.label));
 
+  const brugklassen = staat.heeftBrugklassen ? brugklassenEditor(school, dialoog) : null;
   const opslaan = h('button', { type: 'submit', class: 'knop' }, 'Opslaan');
 
   const formulier = h('form', {
@@ -247,9 +314,18 @@ function openFormulier(school) {
       if (staat.heeftInformatie) waarden.informatie = informatie || null;
       if (staat.heeftTweetalig) waarden.tweetalig = formulier.querySelector('#f-tweetalig').checked;
 
+      let brugklasRijen;
+      if (brugklassen) {
+        brugklasRijen = brugklassen.waarden();
+        if (brugklasRijen.some((r) => r.niveaus.length === 0)) {
+          melding('Kies bij elke brugklas minstens één niveau, of verwijder de brugklas.', true);
+          return;
+        }
+      }
+
       opslaan.disabled = true;
       try {
-        await bewaarSchool(school, waarden, gekozen);
+        await bewaarSchool(school, waarden, gekozen, brugklasRijen);
         sluit(dialoog);
         melding(school ? 'School opgeslagen.' : 'School toegevoegd.');
         await laadScholen();
@@ -266,9 +342,15 @@ function openFormulier(school) {
   ...veld('f-plaats', 'Plaats', school?.plaats, 'text', { required: true }),
   ...veld('f-adres', 'Adres (niet verplicht)', school?.adres),
   ...veld('f-website', 'Website (niet verplicht)', school?.website, 'text', { placeholder: 'www.voorbeeld.nl' }),
+  h('fieldset', {}, h('legend', {}, 'Dit niveau wordt aangeboden'), ...niveauVelden.flat()),
+  brugklassen
+    ? h('fieldset', {},
+      h('legend', {}, 'Brugklassen'),
+      h('p', { class: 'hint' }, 'Een brede brugklas combineert niveaus. Kies per brugklas de niveaus en hoe lang hij duurt.'),
+      brugklassen.element)
+    : h('p', { class: 'hint' }, 'Brugklassen invoeren kan nog niet: voer supabase/schema.sql opnieuw uit in Supabase.'),
   ...tweetaligVeld(school),
   ...informatieVeld(school),
-  h('fieldset', {}, h('legend', {}, 'Dit niveau wordt aangeboden'), ...niveauVelden.flat()),
   h('div', { class: 'rij' },
     opslaan,
     h('button', { type: 'button', class: 'knop zacht', onclick: () => sluit(dialoog) }, 'Annuleren'),
@@ -291,7 +373,7 @@ function openFormulier(school) {
   dialoog.showModal();
 }
 
-async function bewaarSchool(school, waarden, gekozen) {
+async function bewaarSchool(school, waarden, gekozen, brugklasRijen) {
   let id = school?.id;
   if (id) {
     const { error } = await sb.from('scholen').update(waarden).eq('id', id);
@@ -314,6 +396,25 @@ async function bewaarSchool(school, waarden, gekozen) {
   if (erbij.length) {
     const { error } = await sb.from('school_niveaus').insert(erbij.map((niveau_id) => ({ school_id: id, niveau_id })));
     if (error) throw error;
+  }
+
+  // Brugklassen: eerst de nieuwe opslaan, dan pas de oude weghalen, zodat er niets verloren gaat als er iets misgaat.
+  if (brugklasRijen) {
+    if (brugklasRijen.length) {
+      const rijen = brugklasRijen.map((r, i) => ({
+        school_id: id,
+        niveaus: [...r.niveaus].sort((a, b) => BRUGKLAS_NIVEAUS.indexOf(a) - BRUGKLAS_NIVEAUS.indexOf(b)),
+        jaren: r.niveaus.length > 1 ? r.jaren : 1,
+        volgorde: i + 1,
+      }));
+      const { error } = await sb.from('school_brugklassen').insert(rijen);
+      if (error) throw error;
+    }
+    const oudeIds = (school?.brugklassen || []).map((b) => b.id);
+    if (oudeIds.length) {
+      const { error } = await sb.from('school_brugklassen').delete().in('id', oudeIds);
+      if (error) throw error;
+    }
   }
 }
 
@@ -389,7 +490,7 @@ function openBeroepFormulier(beroep) {
               onclick: () => { routes.splice(i, 1); tekenRoutes(); },
             }, 'Route verwijderen')));
       }),
-      routes.length === 0 && h('p', { class: 'hint' }, 'Nog geen routes. Voeg er een toe.'),
+      ...(routes.length === 0 ? [h('p', { class: 'hint' }, 'Nog geen routes. Voeg er een toe.')] : []),
       h('button', {
         type: 'button', class: 'knop zacht',
         onclick: () => { routes.push([]); tekenRoutes(); routesEl.querySelectorAll('select')[routes.length - 1]?.focus(); },

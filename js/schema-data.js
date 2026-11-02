@@ -204,8 +204,10 @@ export const DEMO_SCHOLEN = [
   { id: 'd1', naam: 'Voorbeeldschool Pr.o.', plaats: 'Heerlen', adres: '', website: '', niveaus: ['pro'] },
   { id: 'd2', naam: 'Voorbeeld Praktijkschool', plaats: 'Maastricht', adres: '', website: '', niveaus: ['pro', 'vmbo-bbl'] },
   { id: 'd3', naam: 'Voorbeeld Vakcollege', plaats: 'Sittard', adres: '', website: '', niveaus: ['vmbo-bbl', 'vmbo-kbl', 'vmbo-gl'] },
-  { id: 'd4', naam: 'Voorbeeld Scholengemeenschap', plaats: 'Maastricht', adres: '', website: '', informatie: 'Brugklassen: gl/tl, havo/vwo en vwo.\nOpen dag in januari.', tweetalig: true, niveaus: ['vmbo-gl', 'vmbo-tl', 'havo', 'vwo'] },
-  { id: 'd5', naam: 'Voorbeeld College', plaats: 'Heerlen', adres: '', website: '', niveaus: ['vmbo-tl', 'havo', 'vwo'] },
+  { id: 'd4', naam: 'Voorbeeld Scholengemeenschap', plaats: 'Maastricht', adres: '', website: '', informatie: 'Open dag in januari.', tweetalig: true,
+    brugklassen: [{ niveaus: ['vmbo-gl', 'vmbo-tl'], jaren: 1 }, { niveaus: ['havo', 'vwo'], jaren: 2 }], niveaus: ['vmbo-gl', 'vmbo-tl', 'havo', 'vwo'] },
+  { id: 'd5', naam: 'Voorbeeld College', plaats: 'Heerlen', adres: '', website: '',
+    brugklassen: [{ niveaus: ['vmbo-tl', 'havo'], jaren: 2 }], niveaus: ['vmbo-tl', 'havo', 'vwo'] },
   { id: 'd6', naam: 'Voorbeeld Lyceum', plaats: 'Kerkrade', adres: '', website: '', tweetalig: true, niveaus: ['havo', 'vwo'] },
   { id: 'd7', naam: 'Voorbeeld Atheneum', plaats: 'Geleen', adres: '', website: '', niveaus: ['vwo'] },
 ];
@@ -252,3 +254,27 @@ export const DEMO_BEROEPEN = [
     ],
   },
 ];
+
+// ---------- Brugklassen ----------
+
+// Niveaus waaruit een (brede) brugklas kan bestaan, in vaste volgorde.
+export const BRUGKLAS_NIVEAUS = ['vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl', 'havo', 'vwo'];
+
+// Snelle keuzes voor veelvoorkomende combinaties.
+export const BRUGKLAS_VOORBEELDEN = [
+  ['vmbo-bbl', 'vmbo-kbl'],
+  ['vmbo-kbl', 'vmbo-gl', 'vmbo-tl'],
+  ['vmbo-gl', 'vmbo-tl'],
+  ['vmbo-tl', 'havo'],
+  ['havo', 'vwo'],
+  ['vmbo-tl', 'havo', 'vwo'],
+];
+
+const brugklasKort = (id) => (NIVEAU_INFO[id]?.kort || id).replace('vmbo ', '');
+
+// Bijvoorbeeld "Brede brugklas tl/havo (2 jaar)" of "Brugklas vwo".
+export function brugklasLabel(niveaus, jaren) {
+  const volgorde = [...niveaus].sort((a, b) => BRUGKLAS_NIVEAUS.indexOf(a) - BRUGKLAS_NIVEAUS.indexOf(b));
+  const tekst = volgorde.map(brugklasKort).join('/');
+  return niveaus.length > 1 ? `Brede brugklas ${tekst} (${jaren} jaar)` : `Brugklas ${tekst}`;
+}

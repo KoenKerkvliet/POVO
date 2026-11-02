@@ -23,6 +23,9 @@ export async function laadGegevens() {
     haal('niveaus?select=id,omschrijving'),
   ]);
 
+  // Brugklassen staan in een eigen tabel; bestaat die nog niet, dan tonen we gewoon geen brugklassen.
+  const brugklassen = await haal('school_brugklassen?select=*&order=volgorde.asc').catch(() => []);
+
   // Beroepen zijn een aparte stap: ontbreken de tabellen nog, dan werkt de rest gewoon door.
   const beroepen = await haal('beroepen?select=id,naam,omschrijving,beroep_routes(id,stappen,volgorde)&order=naam.asc')
     .then((rijen) => rijen.map((b) => ({
@@ -42,6 +45,7 @@ export async function laadGegevens() {
       adres: s.adres || '',
       informatie: s.informatie || '',
       tweetalig: Boolean(s.tweetalig),
+      brugklassen: brugklassen.filter((b) => b.school_id === s.id).map((b) => ({ niveaus: b.niveaus, jaren: b.jaren })),
       website: s.website || '',
       niveaus: s.school_niveaus.map((n) => n.niveau_id),
     })),

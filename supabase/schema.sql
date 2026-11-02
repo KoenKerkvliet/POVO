@@ -117,3 +117,31 @@ grant usage on schema public to anon, authenticated;
 grant select on public.niveaus, public.scholen, public.school_niveaus to anon, authenticated;
 grant update on public.niveaus to authenticated;
 grant insert, update, delete on public.scholen, public.school_niveaus to authenticated;
+
+-- 4. Brugklassen -----------------------------------------------
+-- Welke (brede) brugklassen een school heeft, bijvoorbeeld "havo/vwo, 2 jaar".
+-- 'niveaus' zijn ids uit de tabel niveaus; 'jaren' is hoe lang de brede brugklas duurt.
+create table if not exists public.school_brugklassen (
+  id        uuid primary key default gen_random_uuid(),
+  school_id uuid not null references public.scholen (id) on delete cascade,
+  niveaus   text[] not null check (cardinality(niveaus) between 1 and 6),
+  jaren     smallint not null default 1 check (jaren between 1 and 3),
+  volgorde  integer not null default 0
+);
+
+create index if not exists school_brugklassen_school_idx on public.school_brugklassen (school_id);
+
+alter table public.school_brugklassen enable row level security;
+
+drop policy if exists "school_brugklassen lezen"  on public.school_brugklassen;
+drop policy if exists "school_brugklassen beheren" on public.school_brugklassen;
+
+create policy "school_brugklassen lezen" on public.school_brugklassen
+  for select to anon, authenticated using (true);
+
+create policy "school_brugklassen beheren" on public.school_brugklassen
+  for all to authenticated
+  using (public.is_beheerder()) with check (public.is_beheerder());
+
+grant select on public.school_brugklassen to anon, authenticated;
+grant insert, update, delete on public.school_brugklassen to authenticated;
