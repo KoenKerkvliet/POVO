@@ -251,7 +251,7 @@ function brugklassenEditor(school, dialoog) {
           }, bkKort(id)))),
         rij.niveaus.length > 1 && h('label', { class: 'jaren' }, 'Duur',
           h('select', { onchange: (e) => { rij.jaren = Number(e.target.value); } },
-            ...[...new Set([1, 2, rij.jaren])].sort().map((j) =>
+            ...[...new Set([1, 2, 3, rij.jaren])].sort().map((j) =>
               h('option', { value: String(j), selected: rij.jaren === j }, `${j} jaar`)))),
         h('button', {
           type: 'button', class: 'knop gevaar klein',
