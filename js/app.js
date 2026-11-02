@@ -109,6 +109,32 @@ function tekenTekst(regels, cx) {
     svg('text', { x: cx, y, 'font-size': grootte, 'font-weight': vet ? 800 : 600, 'text-anchor': 'middle' }, tekst));
 }
 
+// Klassen in een kolom (havo, vwo): streepjes per jaar, een sluier over de klassen die instromers overslaan,
+// en een label op klas 4, waar instromers binnenkomen.
+function klassenLaag(def) {
+  const { x, y, w, h: hoogte, klassen, instroom } = def;
+  const onder = y + hoogte;
+  const r = 14;
+  const delen = [
+    svg('path', {
+      class: 'sluier',
+      d: `M ${x} ${onder - instroom * JAAR_PX} H ${x + w} V ${onder - r} a ${r} ${r} 0 0 1 ${-r} ${r} H ${x + r} a ${r} ${r} 0 0 1 ${-r} ${-r} Z`,
+    }),
+  ];
+  for (let k = 1; k < klassen; k++) {
+    const lijnY = onder - k * JAAR_PX;
+    delen.push(svg('line', { class: k === instroom ? 'klas-lijn instroom-lijn' : 'klas-lijn', x1: x + 10, x2: x + w - 10, y1: lijnY, y2: lijnY }));
+  }
+  for (let n = 1; n <= klassen; n++) {
+    delen.push(svg('text', { class: 'klas-label', x: x + 10, y: onder - n * JAAR_PX + 18 }, `klas ${n}`));
+  }
+  const midden = onder - (instroom + 0.5) * JAAR_PX;
+  delen.push(svg('g', { class: 'instroom' },
+    svg('rect', { x: x + w / 2 - 40, y: midden - 11, width: 80, height: 22, rx: 11 }),
+    svg('text', { x: x + w / 2, y: midden + 5, 'text-anchor': 'middle' }, 'instroom')));
+  return delen;
+}
+
 function maakBlok(def, extra = []) {
   const { id, kleur, x, y, w, h: hoogte } = def;
   return svg('g', {
@@ -120,6 +146,7 @@ function maakBlok(def, extra = []) {
     rx: 14, stroke: kleur,
   }),
   svg('rect', { class: 'vorm', x, y, width: w, height: hoogte, rx: 14, fill: kleur }),
+  ...(def.klassen ? klassenLaag(def) : []),
   ...tekenTekst(def.tekst, x + w / 2),
   ...extra);
 }

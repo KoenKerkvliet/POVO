@@ -56,8 +56,10 @@ export const BLOKKEN = [
     verlenging: { y: jaarY(6), h: JAAR_PX }, // gestippeld stuk: sommige leerlingen doen er een jaar langer over
     tekst: [['praktijk', jaarY(5) + 44, 22, true], ['onderwijs', jaarY(5) + 70, 22, true], ['5/6 jaar', jaarY(5) + 100, 16, false]] },
   { id: 'havo', kleur: KLEUREN.havo, x: 846, y: jaarY(5), w: 150, h: 5 * JAAR_PX,
+    klassen: 5, instroom: 3, // wie van het vmbo komt, stroomt in op klas 4: de eerste 3 klassen sla je over
     tekst: [['havo', jaarY(5) + 46, 30, true], ['5 jaar', jaarY(5) + 74, 16, false]] },
   { id: 'vwo', kleur: KLEUREN.vwo, x: 1050, y: jaarY(6), w: 150, h: 6 * JAAR_PX,
+    klassen: 6, instroom: 3, // wie van de havo komt, stroomt in op klas 4
     tekst: [['vwo', jaarY(6) + 46, 30, true], ['6 jaar', jaarY(6) + 74, 16, false]] },
   { id: 'werk', kleur: KLEUREN.werk, x: 90, y: RIJ_Y, w: 140, h: RIJ_H,
     tekst: [['Werk', RIJ_Y + RIJ_H / 2 + 9, 28, true]] },
@@ -101,8 +103,8 @@ function omhoog(van, naar) {
 // Kleine boog boven de mbo-balk (van niveau n naar n+1).
 const boog = (van, naar) => `M ${van} ${RIJ_Y - 4} C ${van + 3} ${RIJ_Y - 40}, ${naar - 3} ${RIJ_Y - 40}, ${naar} ${RIJ_Y - 3}`;
 
-// Hoogte waarop tl -> havo en havo -> vwo lopen: halverwege de leerweg-blokjes.
-const zijY = LEERWEG_Y + LEERWEG_H / 2;
+// Hoogte van het midden van een klas (1 = eerste klas) in een kolom. Instromers komen binnen op klas 4.
+const klasY = (klas) => GROND_Y - (klas - 0.5) * JAAR_PX;
 
 // van = blok waar de pijl uit komt, naar = blok waar je terechtkomt.
 export const PIJLEN = [
@@ -115,7 +117,7 @@ export const PIJLEN = [
   { van: 'vmbo-gl', naar: 'mbo3', d: omhoog(590, 615) },
   { van: 'vmbo-gl', naar: 'mbo4', d: omhoog(625, 725) },
   { van: 'vmbo-tl', naar: 'mbo4', d: omhoog(735, 760) },
-  { van: 'vmbo-tl', naar: 'havo', d: `M 794 ${zijY} C 816 ${zijY}, 826 ${zijY - 15}, 842 ${zijY - 15}` },
+  { van: 'vmbo-tl', naar: 'havo', d: `M 794 ${klasY(4)} L 842 ${klasY(4)}` },
 
   { van: 'mbo1', naar: 'mbo2', d: boog(375, 425) },
   { van: 'mbo2', naar: 'mbo3', d: boog(505, 555) },
@@ -124,7 +126,7 @@ export const PIJLEN = [
 
   { van: 'havo', naar: 'mbo4', d: `M 880 ${jaarY(5) - KOP} C 880 ${jaarY(5) - KOP - 0.66 * (jaarY(5) - KOP - mboMidden)}, 850 ${mboMidden}, 797 ${mboMidden}` },
   { van: 'havo', naar: 'hbo', d: `M 940 ${jaarY(5) - KOP} L 940 ${rijOnder}` },
-  { van: 'havo', naar: 'vwo', d: `M 1000 ${zijY} C 1018 ${zijY}, 1030 ${zijY - 15}, 1046 ${zijY - 15}` },
+  { van: 'havo', naar: 'vwo', d: `M 1000 ${klasY(5)} C 1022 ${klasY(5)}, 1024 ${klasY(4)}, 1046 ${klasY(4)}` },
 
   { van: 'vwo', naar: 'hbo', d: `M 1075 ${jaarY(6) - KOP} C 1075 ${jaarY(6) - 36}, 1000 ${jaarY(6) - 31}, 980 ${rijOnder}` },
   { van: 'vwo', naar: 'wo', d: `M 1125 ${jaarY(6) - KOP} L 1125 ${rijOnder}` },
@@ -175,11 +177,11 @@ export const STANDAARD_OMSCHRIJVING = {
   'vmbo-gl':
     'De gemengde leerweg: een mix van de theorie van de tl en de praktijk van een beroepsrichting. Daarna ga je naar mbo niveau 3 of 4.',
   'vmbo-tl':
-    'De theoretische leerweg, vroeger mavo genoemd: je leert vooral uit boeken en met opdrachten. Daarna ga je naar mbo niveau 4 of naar de havo.',
+    'De theoretische leerweg, vroeger mavo genoemd: je leert vooral uit boeken en met opdrachten. Daarna ga je naar mbo niveau 4 of naar klas 4 van de havo.',
   havo:
-    'De havo duurt 5 jaar. Je volgt algemene vakken en leert veel zelf plannen en uitzoeken. Daarna kun je naar het hbo, naar mbo niveau 4 of doorstromen naar het vwo.',
+    'De havo duurt 5 jaar. Je volgt algemene vakken en leert veel zelf plannen en uitzoeken. Kom je van het vmbo (tl), dan stroom je in op klas 4 en doe je nog 2 jaar. Daarna kun je naar het hbo, naar mbo niveau 4 of naar klas 4 van het vwo.',
   vwo:
-    'Het vwo duurt 6 jaar. Je volgt algemene vakken en leert veel over onderzoeken en uitzoeken. Op het gymnasium leer je ook Latijn en Grieks. Daarna kun je naar de universiteit of naar het hbo.',
+    'Het vwo duurt 6 jaar. Je volgt algemene vakken en leert veel over onderzoeken en uitzoeken. Op het gymnasium leer je ook Latijn en Grieks. Kom je van de havo, dan stroom je in op klas 4 en doe je nog 3 jaar. Daarna kun je naar de universiteit of naar het hbo.',
   gymnasium:
     'Het gymnasium is vwo, met daarbij Latijn en Grieks. Het duurt 6 jaar. Daarna kun je naar de universiteit of naar het hbo.',
   mbo:

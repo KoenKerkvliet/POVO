@@ -480,6 +480,14 @@ body.start {
 #schema .cel.actief > .vorm { fill: rgba(255, 255, 255, .38); stroke: #0f172a; stroke-width: 5; }
 #schema .cel:focus-visible > .vorm { stroke: #fff; stroke-width: 4; stroke-dasharray: 8 5; }
 
+/* klassen in havo en vwo: instromers komen binnen op klas 4 */
+#schema .sluier { fill: rgba(255, 255, 255, .2); pointer-events: none; }
+#schema .klas-lijn { stroke: rgba(255, 255, 255, .4); stroke-width: 1.5; stroke-dasharray: 3 6; pointer-events: none; }
+#schema .instroom-lijn { stroke: rgba(255, 255, 255, .9); stroke-width: 2; stroke-dasharray: none; }
+#schema .klas-label { font-size: 11px; font-weight: 700; fill: rgba(255, 255, 255, .8); }
+#schema .instroom rect { fill: rgba(255, 255, 255, .3); pointer-events: none; }
+#schema .instroom text { font-size: 12px; font-weight: 800; }
+
 /* routes naar een beroep */
 #schema .blok.op-route > .vorm { stroke: #f59e0b; stroke-width: 7; }
 #schema .blok.actief > .vorm { stroke: #0f172a; stroke-width: 5; }
