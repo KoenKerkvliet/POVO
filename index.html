@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Na de basisschool</title>
+  <meta name="description" content="Een interactief schema over de wegen na de basisschool en de scholen in de regio.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbalk">
+    <h1>Na de basisschool</h1>
+    <span class="regio" id="regio"></span>
+  </header>
+
+  <nav id="beroepen" class="beroepen" aria-label="Beroepen" hidden></nav>
+
+  <section id="paneel" class="paneel" aria-live="polite"></section>
+
+  <main class="schema-wrap">
+    <svg id="schema" viewBox="0 90 1230 710" role="group" aria-label="Schema met de wegen na de basisschool"></svg>
+  </main>
+
+  <footer class="voet">
+    <a href="beheer.html">Beheer</a>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+:root {
+  --achtergrond: #f6f7fb;
+  --kaart: #ffffff;
+  --tekst: #0f172a;
+  --tekst-zacht: #475569;
+  --lijn: #dbe0ea;
+  --accent: #0f172a;
+  --straal: 14px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--achtergrond);
+  color: var(--tekst);
+  font-family: ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.45;
+}
+
+a { color: inherit; }
+
+/* ---------- Pagina ---------- */
+
+.topbalk {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 24px 6px;
+}
+.topbalk h1 { margin: 0; font-size: 1.5rem; }
+.regio {
+  font-size: .95rem;
+  color: var(--tekst-zacht);
+  background: var(--kaart);
+  border: 1px solid var(--lijn);
+  border-radius: 999px;
+  padding: 2px 12px;
+}
+
+.voet { padding: 4px 24px 18px; font-size: .85rem; color: var(--tekst-zacht); text-align: right; }
+
+/* ---------- Paneel bovenin ---------- */
+
+.paneel {
+  margin: 8px 24px 4px;
+  padding: 16px 20px;
+  background: var(--kaart);
+  border: 1px solid var(--lijn);
+  border-radius: var(--straal);
+  min-height: 200px;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr);
+  gap: 8px 28px;
+  align-content: start;
+}
+.paneel.met-scholen { grid-template-columns: minmax(260px, 2fr) minmax(0, 3fr); }
+.paneel h2 { margin: 0 0 6px; font-size: 1.35rem; }
+.paneel p { margin: 0 0 8px; }
+
+.info { border-left: 8px solid var(--kleur, var(--lijn)); padding-left: 14px; }
+.info .duur {
+  margin-left: 10px;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--tekst-zacht);
+  vertical-align: middle;
+}
+
+.intro .noot { color: var(--tekst-zacht); max-width: 70ch; }
+
+.hierna { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.hierna-label { font-size: .9rem; color: var(--tekst-zacht); }
+
+.chip {
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--kleur);
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 14px;
+  cursor: pointer;
+}
+.chip:hover { filter: brightness(1.12); }
+
+.scholen-kop { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 8px; }
+.scholen h3 { margin: 0; font-size: 1.05rem; }
+.aantal {
+  margin-left: 8px;
+  font-size: .85rem;
+  background: var(--achtergrond);
+  border: 1px solid var(--lijn);
+  border-radius: 999px;
+  padding: 0 9px;
+}
+.plaatsen { display: flex; flex-wrap: wrap; gap: 6px; }
+.filter {
+  font: inherit;
+  font-size: .85rem;
+  background: var(--kaart);
+  color: var(--tekst);
+  border: 1px solid var(--lijn);
+  border-radius: 999px;
+  padding: 2px 12px;
+  cursor: pointer;
+}
+.filter[aria-pressed="true"] { background: var(--tekst); color: #fff; border-color: var(--tekst); }
+
+.school-lijst {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+}
+.school {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 12px;
+  border: 1px solid var(--lijn);
+  border-radius: 10px;
+  background: var(--achtergrond);
+}
+.school .plaats { color: var(--tekst-zacht); font-size: .9rem; }
+.school .adres, .school .leerwegen { color: var(--tekst-zacht); font-size: .8rem; }
+.school .leerwegen { font-weight: 700; }
+.school a { font-size: .85rem; margin-top: 2px; }
+
+.leeg, .demo, .fout { color: var(--tekst-zacht); font-size: .9rem; }
+.demo {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 4px 10px;
+  background: #fef3c7;
+  color: #78350f;
+  border-radius: 8px;
+}
+.fout { color: #b91c1c; }
+
+
+/* ---------- Beroepen ---------- */
+
+.beroepen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 24px 0;
+}
+.beroepen[hidden] { display: none; }
+.beroepen-label { font-size: .95rem; color: var(--tekst-zacht); margin-right: 4px; }
+.beroep-chip {
+  font: inherit;
+  font-weight: 700;
+  padding: 5px 16px;
+  border-radius: 999px;
+  border: 2px solid #b45309;
+  background: var(--kaart);
+  color: #92400e;
+  cursor: pointer;
+}
+.beroep-chip:hover { background: #fffbeb; }
+.beroep-chip[aria-pressed="true"] { background: #b45309; color: #fff; }
+
+.beroep h2 { color: #92400e; }
+.routes { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.route {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  padding: 3px 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+}
+.route[data-gekozen="true"] { border-color: #f59e0b; background: #fffbeb; }
+.route-knop {
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid #94a3b8;
+  background: var(--kaart);
+  cursor: pointer;
+}
+.route-knop[aria-pressed="true"] { background: #b45309; border-color: #b45309; color: #fff; }
+.pijltje { color: var(--tekst-zacht); font-weight: 700; }
+.stap {
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px 3px 4px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--kleur, #475569);
+  color: #fff;
+  cursor: pointer;
+}
+.stap b {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #b45309;
+  border: 2px solid #fff;
+  font-size: .72rem;
+}
+.stap:hover { filter: brightness(1.12); }
+.stap.eind { background: #fff; color: #92400e; border: 2px solid #b45309; padding: 1px 12px; cursor: default; font-weight: 800; }
+.zij { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+/* ---------- Schema ---------- */
+
+.schema-wrap { padding: 4px 24px 0; overflow-x: auto; }
+#schema {
+  display: block;
+  width: 100%;
+  min-width: 860px;
+  max-width: 1400px;
+  margin: 0 auto;
+  height: auto;
+  max-height: max(480px, calc(100vh - 330px));
+  font-family: inherit;
+  user-select: none;
+}
+
+#schema text { fill: #fff; pointer-events: none; }
+
+/* tijdlijn */
+#schema .as, #schema .streep { stroke: #64748b; stroke-width: 2; }
+#schema .hulplijn { stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 2 7; stroke-linecap: round; }
+#schema .tijdlijn text { fill: #475569; font-size: 14px; font-weight: 600; }
+#schema .tijdlijn .titel { font-size: 15px; font-weight: 700; }
+
+/* pijlen */
+#schema .pijl {
+  fill: none;
+  stroke: #94a3b8;
+  stroke-width: 4;
+  stroke-linecap: butt;
+  marker-end: url(#kop-grijs);
+  transition: opacity .2s;
+}
+#schema.heeft-keuze .pijl { opacity: .3; }
+#schema .pijl.actief {
+  opacity: 1;
+  stroke: #0f172a;
+  stroke-width: 5;
+  marker-end: url(#kop-donker);
+}
+
+/* blokken */
+#schema .blok { cursor: pointer; outline: none; }
+#schema .blok > .vorm { transition: filter .15s; }
+#schema .blok:hover > .vorm { filter: brightness(1.12); }
+#schema .blok.actief > .vorm { stroke: #0f172a; stroke-width: 5; }
+#schema .blok:focus-visible > .vorm { stroke: #0f172a; stroke-width: 5; stroke-dasharray: 10 6; }
+
+#schema .verlenging { fill: none; stroke-width: 3; stroke-dasharray: 8 7; opacity: .7; }
+
+/* onderdelen binnen vmbo en mbo */
+#schema .cel > .vorm {
+  fill: rgba(255, 255, 255, .2);
+  stroke: rgba(255, 255, 255, .6);
+  stroke-width: 2;
+}
+#schema .cel:hover > .vorm { fill: rgba(255, 255, 255, .32); filter: none; }
+#schema .cel.actief > .vorm { fill: rgba(255, 255, 255, .38); stroke: #0f172a; stroke-width: 5; }
+#schema .cel:focus-visible > .vorm { stroke: #fff; stroke-width: 4; stroke-dasharray: 8 5; }
+
+
+/* routes naar een beroep */
+#schema .blok.op-route > .vorm { stroke: #f59e0b; stroke-width: 7; }
+#schema .blok.actief > .vorm { stroke: #0f172a; stroke-width: 5; }
+#schema .blok.gedimd { opacity: .35; }
+#schema.heeft-route .pijl:not(.route):not(.actief) { opacity: .15; }
+#schema .pijl.route { opacity: 1; stroke: #b45309; stroke-width: 7; marker-end: url(#kop-route); }
+#schema .stapnummer circle { fill: #b45309; stroke: #fff; stroke-width: 3; }
+
+/* ---------- Kleine schermen ---------- */
+
+@media (max-width: 760px) {
+  .beroepen { margin: 4px 14px 0; }
+  .topbalk, .paneel, .schema-wrap { margin-left: 0; margin-right: 0; padding-left: 14px; padding-right: 14px; }
+  .paneel { margin: 8px 14px; padding: 14px; }
+  .paneel.met-scholen { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

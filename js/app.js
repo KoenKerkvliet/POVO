@@ -1,0 +1,360 @@
+// Het doorstroomschema voor de klas.
+import { REGIO } from './config.js';
+import { laadGegevens } from './data.js';
+import { h, svg, veiligeUrl } from './dom.js';
+import {
+  BLOKKEN, VMBO, MBO, LEERWEGEN, MBO_NIVEAUS, PIJLEN, GROEPEN,
+  JAAR_PX, GROND_Y, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, MET_SCHOLEN,
+  leerwegGeometrie, mboGeometrie, hoekVan,
+} from './schema-data.js';
+
+const schemaEl = document.querySelector('#schema');
+const paneelEl = document.querySelector('#paneel');
+const beroepenEl = document.querySelector('#beroepen');
+
+const staat = {
+  gekozen: null, plaats: null, scholen: [], omschrijvingen: {}, demo: false,
+  beroepen: [], beroep: null, route: 0,
+};
+
+// ---------- Hulpfuncties ----------
+
+const leden = (id) => GROEPEN[id] || [id];
+
+function pijlenVan(id) {
+  const set = new Set(leden(id));
+  return PIJLEN.filter((p) => set.has(p.van));
+}
+
+function hierna(id) {
+  const eigen = new Set(leden(id));
+  const doelen = [];
+  for (const p of pijlenVan(id)) {
+    if (!eigen.has(p.naar) && !doelen.includes(p.naar)) doelen.push(p.naar);
+  }
+  return doelen;
+}
+
+function scholenVoor(id) {
+  const set = new Set(leden(id));
+  return staat.scholen.filter((s) => s.niveaus.some((n) => set.has(n)));
+}
+
+const huidigBeroep = () => staat.beroepen.find((b) => b.id === staat.beroep) || null;
+
+// De gekozen route als lijst van onderdelen (na de basisschool).
+function huidigeRoute() {
+  const beroep = huidigBeroep();
+  const route = beroep?.routes[staat.route];
+  return route ? route.stappen : null;
+}
+
+const omschrijving = (id) => staat.omschrijvingen[id] || STANDAARD_OMSCHRIJVING[id] || '';
+
+// ---------- Schema tekenen ----------
+
+function tekenTekst(regels, cx) {
+  return regels.map(([tekst, y, grootte, vet]) =>
+    svg('text', { x: cx, y, 'font-size': grootte, 'font-weight': vet ? 800 : 600, 'text-anchor': 'middle' }, tekst));
+}
+
+function maakBlok(def, extra = []) {
+  const { id, kleur, x, y, w, h: hoogte } = def;
+  return svg('g', {
+    class: 'blok', 'data-id': id, tabindex: 0, role: 'button', 'aria-pressed': 'false',
+    'aria-label': NIVEAU_INFO[id].naam,
+  },
+  def.verlenging && svg('rect', {
+    class: 'verlenging', x: x + 2, y: def.verlenging.y + 2, width: w - 4, height: def.verlenging.h + 2,
+    rx: 14, stroke: kleur,
+  }),
+  svg('rect', { class: 'vorm', x, y, width: w, height: hoogte, rx: 14, fill: kleur }),
+  ...tekenTekst(def.tekst, x + w / 2),
+  ...extra);
+}
+
+function tekenSchema() {
+  const defs = svg('defs', {},
+    ...[['kop-grijs', '#94a3b8'], ['kop-donker', '#0f172a'], ['kop-route', '#b45309']].map(([id, kleur]) =>
+      svg('marker', {
+        id, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 16, markerHeight: 16,
+        markerUnits: 'userSpaceOnUse', orient: 'auto',
+      }, svg('path', { d: 'M0,0 L10,5 L0,10 z', fill: kleur }))));
+
+  // Tijdlijn aan de zijkant: elk jaar een streepje, met stippellijnen door het schema.
+  const tijdlijn = svg('g', { class: 'tijdlijn', 'aria-hidden': 'true' },
+    svg('line', { class: 'as', x1: 78, x2: 78, y1: GROND_Y, y2: GROND_Y - 6 * JAAR_PX }),
+    ...[0, 1, 2, 3, 4, 5, 6].flatMap((jaar) => {
+      const y = GROND_Y - jaar * JAAR_PX;
+      return [
+        jaar > 0 && svg('line', { class: 'hulplijn', x1: 78, x2: 1200, y1: y, y2: y }),
+        svg('line', { class: 'streep', x1: 72, x2: 84, y1: y, y2: y }),
+        svg('text', { class: 'jaar', x: 66, y: y + 5, 'text-anchor': 'end' }, jaar === 0 ? 'start' : `${jaar} jaar`),
+      ];
+    }),
+    svg('text', { class: 'titel', transform: `translate(16 ${GROND_Y - 3 * JAAR_PX}) rotate(-90)`, 'text-anchor': 'middle' },
+      'Leertijd in jaren'));
+
+  const pijlen = svg('g', { class: 'pijlen', 'aria-hidden': 'true' },
+    ...PIJLEN.map((p, i) => svg('path', { class: 'pijl', 'data-van': p.van, 'data-naar': p.naar, 'data-index': i, d: p.d })));
+
+  // vmbo met vier leerwegen
+  const leerwegen = LEERWEGEN.map((lw, i) => {
+    const g = leerwegGeometrie(i);
+    return svg('g', {
+      class: 'blok cel', 'data-id': lw.id, tabindex: 0, role: 'button', 'aria-pressed': 'false',
+      'aria-label': NIVEAU_INFO[lw.id].naam,
+    },
+    svg('rect', { class: 'vorm', x: g.x, y: g.y, width: g.w, height: g.h, rx: 10 }),
+    svg('text', { x: g.x + g.w / 2, y: g.y + 34, 'font-size': 26, 'font-weight': 800, 'text-anchor': 'middle' }, lw.kort),
+    ...lw.regels.map((regel, r) =>
+      svg('text', { x: g.x + g.w / 2, y: g.y + 66 + r * 19, 'font-size': 14, 'font-weight': 600, 'text-anchor': 'middle' }, regel)));
+  });
+  const vmbo = maakBlok(VMBO, leerwegen);
+
+  // mbo-balk met vier niveaus
+  const mboNiveaus = MBO_NIVEAUS.map((n, i) => {
+    const g = mboGeometrie(i);
+    return svg('g', {
+      class: 'blok cel', 'data-id': n.id, tabindex: 0, role: 'button', 'aria-pressed': 'false',
+      'aria-label': NIVEAU_INFO[n.id].naam,
+    },
+    svg('rect', { class: 'vorm', x: g.x, y: g.y, width: g.w, height: g.h, rx: 10 }),
+    svg('text', { x: g.x + g.w / 2, y: g.y + 38, 'font-size': 18, 'font-weight': 800, 'text-anchor': 'middle' }, `niveau ${n.nummer}`),
+    svg('text', { x: g.x + g.w / 2, y: g.y + 62, 'font-size': 14, 'font-weight': 600, 'text-anchor': 'middle' }, n.duur));
+  });
+  const mbo = maakBlok(MBO, mboNiveaus);
+
+  schemaEl.replaceChildren(defs, tijdlijn, pijlen, ...BLOKKEN.map((b) => maakBlok(b)), vmbo, mbo,
+    svg('g', { class: 'stapnummers', 'aria-hidden': 'true' }));
+}
+
+// ---------- Selecteren ----------
+
+function kies(id) {
+  staat.gekozen = staat.gekozen === id ? null : id;
+  staat.plaats = null;
+  werkSchemaBij();
+  tekenPaneel();
+}
+
+function werkSchemaBij() {
+  const id = staat.gekozen;
+  const actiefeBlokken = new Set(id ? [id] : []);
+  schemaEl.classList.toggle('heeft-keuze', Boolean(id));
+
+  schemaEl.querySelectorAll('.blok').forEach((blok) => {
+    const actief = actiefeBlokken.has(blok.dataset.id);
+    blok.classList.toggle('actief', actief);
+    blok.setAttribute('aria-pressed', String(actief));
+  });
+
+  const vanSet = new Set(id ? leden(id) : []);
+  schemaEl.querySelectorAll('.pijl').forEach((pijl) => {
+    pijl.classList.toggle('actief', vanSet.has(pijl.dataset.van));
+  });
+
+  tekenRoute();
+}
+
+// Markeer de gekozen route: blokken, pijlen en stapnummers.
+function tekenRoute() {
+  const route = huidigeRoute();
+  const opRoute = new Set(route || []);
+  const paren = new Set((route || []).slice(1).map((stap, i) => `${route[i]}>${stap}`));
+  schemaEl.classList.toggle('heeft-route', Boolean(route));
+
+  schemaEl.querySelectorAll('.blok').forEach((blok) => {
+    const bid = blok.dataset.id;
+    const bevatRoute = (GROEPEN[bid] || []).some((lid) => opRoute.has(lid));
+    blok.classList.toggle('op-route', opRoute.has(bid));
+    blok.classList.toggle('gedimd', Boolean(route) && !opRoute.has(bid) && !bevatRoute && bid !== 'basisschool');
+  });
+  schemaEl.querySelectorAll('.pijl').forEach((pijl) => {
+    pijl.classList.toggle('route', paren.has(`${pijl.dataset.van}>${pijl.dataset.naar}`));
+  });
+
+  const nummers = (route || []).map((bid, i) => {
+    const hoek = hoekVan(bid);
+    return hoek && svg('g', { class: 'stapnummer', transform: `translate(${hoek.x} ${hoek.y})` },
+      svg('circle', { r: 15 }),
+      svg('text', { y: 6, 'text-anchor': 'middle', 'font-size': 17, 'font-weight': 800 }, String(i + 1)));
+  });
+  schemaEl.querySelector('.stapnummers').replaceChildren(...nummers.filter(Boolean));
+}
+
+// ---------- Paneel bovenin ----------
+
+function tekenIntro() {
+  return h('div', { class: 'intro' },
+    h('h2', {}, 'Klik op een blok'),
+    h('p', {}, `Zie welke scholen er in ${REGIO} zijn en waar je daarna naartoe kunt.`),
+    h('p', { class: 'noot' },
+      'Elk blok is een eigen weg, en alle wegen zijn even waardevol. Het gaat niet om hoger of lager, maar om wat bij jou past. ',
+      'De hoogte van een blok laat alleen zien hoeveel jaar het duurt.'));
+}
+
+function tekenInfo(id) {
+  const info = NIVEAU_INFO[id];
+  const doelen = hierna(id);
+  return h('div', { class: 'info', style: `--kleur: ${info.kleur}` },
+    h('h2', {}, info.naam, info.duur && h('span', { class: 'duur' }, info.duur)),
+    h('p', {}, omschrijving(id)),
+    doelen.length > 0 && h('div', { class: 'hierna' },
+      h('span', { class: 'hierna-label' }, 'Hierna kun je naar:'),
+      ...doelen.map((doel) =>
+        h('button', { type: 'button', class: 'chip', style: `--kleur: ${NIVEAU_INFO[doel].kleur}`, onclick: () => kies(doel) },
+          NIVEAU_INFO[doel].kort))));
+}
+
+function tekenScholen(id) {
+  const alle = scholenVoor(id);
+  const plaatsen = [...new Set(alle.map((s) => s.plaats))].sort((a, b) => a.localeCompare(b, 'nl'));
+  const getoond = staat.plaats ? alle.filter((s) => s.plaats === staat.plaats) : alle;
+  const metLeerwegen = id === 'vmbo';
+
+  const kaarten = getoond.map((s) => {
+    const url = veiligeUrl(s.website);
+    const leerwegen = metLeerwegen
+      ? LEERWEGEN.filter((lw) => s.niveaus.includes(lw.id)).map((lw) => lw.kort).join(' · ')
+      : '';
+    return h('li', { class: 'school' },
+      h('strong', {}, s.naam),
+      h('span', { class: 'plaats' }, s.plaats),
+      s.adres && h('span', { class: 'adres' }, s.adres),
+      leerwegen && h('span', { class: 'leerwegen' }, leerwegen),
+      url && h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, 'Website'));
+  });
+
+  return h('div', { class: 'scholen' },
+    h('div', { class: 'scholen-kop' },
+      h('h3', {}, `Scholen in ${REGIO}`, h('span', { class: 'aantal' }, String(getoond.length))),
+      plaatsen.length > 1 && h('div', { class: 'plaatsen', role: 'group', 'aria-label': 'Filter op plaats' },
+        h('button', {
+          type: 'button', class: 'filter', 'aria-pressed': String(!staat.plaats),
+          onclick: () => { staat.plaats = null; tekenPaneel(); },
+        }, 'Alle plaatsen'),
+        ...plaatsen.map((p) =>
+          h('button', {
+            type: 'button', class: 'filter', 'aria-pressed': String(staat.plaats === p),
+            onclick: () => { staat.plaats = staat.plaats === p ? null : p; tekenPaneel(); },
+          }, p)))),
+    getoond.length > 0
+      ? h('ul', { class: 'school-lijst' }, ...kaarten)
+      : h('p', { class: 'leeg' }, 'Hier zijn nog geen scholen ingevoerd.'));
+}
+
+// ---------- Beroepen ----------
+
+function kiesBeroep(id) {
+  staat.beroep = staat.beroep === id ? null : id;
+  staat.route = 0;
+  werkSchemaBij();
+  tekenBeroepen();
+  tekenPaneel();
+}
+
+// Klik op een stap in een route: toon die route in het schema en de uitleg + scholen van die stap.
+function kiesStap(routeIndex, id) {
+  staat.route = routeIndex;
+  staat.gekozen = id;
+  staat.plaats = null;
+  werkSchemaBij();
+  tekenPaneel();
+}
+
+function tekenBeroepen() {
+  if (staat.beroepen.length === 0) {
+    beroepenEl.hidden = true;
+    return;
+  }
+  beroepenEl.hidden = false;
+  beroepenEl.replaceChildren(
+    h('span', { class: 'beroepen-label' }, 'Of kies een beroep:'),
+    ...staat.beroepen.map((b) => h('button', {
+      type: 'button', class: 'beroep-chip', 'aria-pressed': String(staat.beroep === b.id),
+      onclick: () => kiesBeroep(b.id),
+    }, b.naam)));
+}
+
+function tekenBeroep(beroep) {
+  const routes = beroep.routes.map((route, i) => {
+    const stappen = route.stappen;
+    return h('li', { class: 'route', 'data-gekozen': String(i === staat.route) },
+      h('button', {
+        type: 'button', class: 'route-knop', 'aria-pressed': String(i === staat.route),
+        onclick: () => { staat.route = i; werkSchemaBij(); tekenPaneel(); },
+      }, `Route ${i + 1}`),
+      ...stappen.flatMap((stap, n) => [
+        n > 0 && h('span', { class: 'pijltje', 'aria-hidden': 'true' }, '→'),
+        h('button', {
+          type: 'button', class: 'stap', style: `--kleur: ${NIVEAU_INFO[stap].kleur}`,
+          onclick: () => kiesStap(i, stap),
+        }, h('b', {}, String(n + 1)), NIVEAU_INFO[stap].kort),
+      ]),
+      h('span', { class: 'pijltje', 'aria-hidden': 'true' }, '→'),
+      h('span', { class: 'stap eind' }, beroep.naam));
+  });
+
+  return h('div', { class: 'beroep' },
+    h('h2', {}, beroep.naam),
+    beroep.omschrijving && h('p', {}, beroep.omschrijving),
+    routes.length === 0
+      ? h('p', { class: 'leeg' }, 'Voor dit beroep zijn nog geen routes ingevoerd.')
+      : h('p', { class: 'hierna-label' },
+        routes.length > 1 ? 'Er zijn meerdere wegen na de basisschool. Kies een route of klik op een stap:' : 'Zo kom je er na de basisschool:'),
+    h('ul', { class: 'routes' }, ...routes));
+}
+
+function tekenPaneel() {
+  const id = staat.gekozen;
+  const beroep = huidigBeroep();
+  const demoNoot = staat.demo && h('p', { class: 'demo' }, 'Voorbeeldgegevens: Supabase is nog niet gekoppeld.');
+  const metScholen = Boolean(id) && MET_SCHOLEN.includes(id);
+
+  if (!id && !beroep) {
+    paneelEl.classList.remove('met-scholen');
+    paneelEl.replaceChildren(tekenIntro(), demoNoot || '');
+    return;
+  }
+
+  // Met een beroep staat de route links en de uitleg of scholen van de gekozen stap rechts.
+  paneelEl.classList.toggle('met-scholen', Boolean(beroep) || metScholen);
+  if (beroep) {
+    const zijkant = id
+      ? h('div', { class: 'zij' }, tekenInfo(id), metScholen ? tekenScholen(id) : '')
+      : h('p', { class: 'leeg' }, 'Klik op een stap in de route of in het schema voor uitleg en scholen.');
+    paneelEl.replaceChildren(tekenBeroep(beroep), zijkant, demoNoot || '');
+  } else {
+    paneelEl.replaceChildren(tekenInfo(id), metScholen ? tekenScholen(id) : '', demoNoot || '');
+  }
+}
+
+// ---------- Start ----------
+
+schemaEl.addEventListener('click', (e) => {
+  const blok = e.target.closest('.blok');
+  if (blok) kies(blok.dataset.id);
+});
+schemaEl.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const blok = e.target.closest('.blok');
+  if (!blok) return;
+  e.preventDefault();
+  kies(blok.dataset.id);
+});
+
+document.querySelector('#regio').textContent = REGIO;
+tekenSchema();
+tekenPaneel();
+
+laadGegevens()
+  .then((gegevens) => {
+    Object.assign(staat, gegevens);
+    tekenBeroepen();
+    tekenPaneel();
+  })
+  .catch((fout) => {
+    console.error(fout);
+    paneelEl.replaceChildren(h('p', { class: 'fout' }, 'De scholen konden niet worden geladen. Probeer de pagina te verversen.'));
+  });
