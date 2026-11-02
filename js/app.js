@@ -5,12 +5,15 @@ import { h, svg, veiligeUrl } from './dom.js';
 import {
   BLOKKEN, VMBO, MBO, LEERWEGEN, MBO_NIVEAUS, PIJLEN, GROEPEN,
   JAAR_PX, GROND_Y, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, MET_SCHOLEN,
-  leerwegGeometrie, mboGeometrie, hoekVan,
+  leerwegGeometrie, mboGeometrie, hoekVan, SCHEMA_VIEWBOX,
 } from './schema-data.js';
 
 const schemaEl = document.querySelector('#schema');
 const paneelEl = document.querySelector('#paneel');
-const beroepenEl = document.querySelector('#beroepen');
+const beroepKeuzeEl = document.querySelector('#beroep-keuze');
+const beroepSelectEl = document.querySelector('#beroep-select');
+const infoKnopEl = document.querySelector('#info-knop');
+const infoEl = document.querySelector('#info');
 
 const staat = {
   gekozen: null, plaats: null, scholen: [], omschrijvingen: {}, demo: false,
@@ -74,6 +77,7 @@ function maakBlok(def, extra = []) {
 }
 
 function tekenSchema() {
+  schemaEl.setAttribute('viewBox', SCHEMA_VIEWBOX);
   const defs = svg('defs', {},
     ...[['kop-grijs', '#94a3b8'], ['kop-donker', '#0f172a'], ['kop-route', '#b45309']].map(([id, kleur]) =>
       svg('marker', {
@@ -185,20 +189,13 @@ function tekenRoute() {
 
 // ---------- Paneel bovenin ----------
 
-function tekenIntro() {
-  return h('div', { class: 'intro' },
-    h('h2', {}, 'Klik op een blok'),
-    h('p', {}, `Zie welke scholen er in ${REGIO} zijn en waar je daarna naartoe kunt.`),
-    h('p', { class: 'noot' },
-      'Elk blok is een eigen weg, en alle wegen zijn even waardevol. Het gaat niet om hoger of lager, maar om wat bij jou past. ',
-      'De hoogte van een blok laat alleen zien hoeveel jaar het duurt.'));
-}
-
 function tekenInfo(id) {
   const info = NIVEAU_INFO[id];
   const doelen = hierna(id);
   return h('div', { class: 'info', style: `--kleur: ${info.kleur}` },
-    h('h2', {}, info.naam, info.duur && h('span', { class: 'duur' }, info.duur)),
+    h('div', { class: 'kop-rij' },
+      h('h2', {}, info.naam, info.duur && h('span', { class: 'duur' }, info.duur)),
+      h('button', { type: 'button', class: 'sluit', 'aria-label': `Sluit ${info.kort}`, onclick: () => kies(id) }, '×')),
     h('p', {}, omschrijving(id)),
     doelen.length > 0 && h('div', { class: 'hierna' },
       h('span', { class: 'hierna-label' }, 'Hierna kun je naar:'),
@@ -247,10 +244,10 @@ function tekenScholen(id) {
 // ---------- Beroepen ----------
 
 function kiesBeroep(id) {
-  staat.beroep = staat.beroep === id ? null : id;
+  staat.beroep = id || null;
   staat.route = 0;
+  beroepSelectEl.value = staat.beroep || '';
   werkSchemaBij();
-  tekenBeroepen();
   tekenPaneel();
 }
 
@@ -263,18 +260,12 @@ function kiesStap(routeIndex, id) {
   tekenPaneel();
 }
 
-function tekenBeroepen() {
-  if (staat.beroepen.length === 0) {
-    beroepenEl.hidden = true;
-    return;
-  }
-  beroepenEl.hidden = false;
-  beroepenEl.replaceChildren(
-    h('span', { class: 'beroepen-label' }, 'Of kies een beroep:'),
-    ...staat.beroepen.map((b) => h('button', {
-      type: 'button', class: 'beroep-chip', 'aria-pressed': String(staat.beroep === b.id),
-      onclick: () => kiesBeroep(b.id),
-    }, b.naam)));
+function vulBeroepKeuze() {
+  beroepKeuzeEl.hidden = staat.beroepen.length === 0;
+  beroepSelectEl.replaceChildren(
+    h('option', { value: '' }, 'Kies een beroep...'),
+    ...staat.beroepen.map((b) => h('option', { value: b.id }, b.naam)));
+  beroepSelectEl.value = staat.beroep || '';
 }
 
 function tekenBeroep(beroep) {
@@ -309,26 +300,47 @@ function tekenBeroep(beroep) {
 function tekenPaneel() {
   const id = staat.gekozen;
   const beroep = huidigBeroep();
-  const demoNoot = staat.demo && h('p', { class: 'demo' }, 'Voorbeeldgegevens: Supabase is nog niet gekoppeld.');
-  const metScholen = Boolean(id) && MET_SCHOLEN.includes(id);
+  const delen = [];
 
-  if (!id && !beroep) {
-    paneelEl.classList.remove('met-scholen');
-    paneelEl.replaceChildren(tekenIntro(), demoNoot || '');
-    return;
+  if (beroep) delen.push(tekenBeroep(beroep));
+  if (id) {
+    delen.push(tekenInfo(id));
+    if (MET_SCHOLEN.includes(id)) delen.push(tekenScholen(id));
+  }
+  if (delen.length === 0) {
+    delen.push(h('div', { class: 'leeg-paneel' },
+      h('p', { class: 'leeg-kop' }, 'Hier komt de uitleg'),
+      h('p', {}, 'Kies een blok in de kaart of een beroep bovenin.')));
   }
 
-  // Met een beroep staat de route links en de uitleg of scholen van de gekozen stap rechts.
-  paneelEl.classList.toggle('met-scholen', Boolean(beroep) || metScholen);
-  if (beroep) {
-    const zijkant = id
-      ? h('div', { class: 'zij' }, tekenInfo(id), metScholen ? tekenScholen(id) : '')
-      : h('p', { class: 'leeg' }, 'Klik op een stap in de route of in het schema voor uitleg en scholen.');
-    paneelEl.replaceChildren(tekenBeroep(beroep), zijkant, demoNoot || '');
-  } else {
-    paneelEl.replaceChildren(tekenInfo(id), metScholen ? tekenScholen(id) : '', demoNoot || '');
-  }
+  paneelEl.replaceChildren(
+    ...delen.map((deel) => h('section', { class: 'paneel-deel' }, deel)),
+    ...(staat.demo ? [h('p', { class: 'demo' }, 'Voorbeeldgegevens: Supabase is nog niet gekoppeld.')] : []));
 }
+
+// ---------- Info-icoon in de kop ----------
+
+function zetInfo(open) {
+  infoEl.hidden = !open;
+  infoKnopEl.setAttribute('aria-expanded', String(open));
+}
+
+infoKnopEl.addEventListener('click', (e) => {
+  e.stopPropagation();
+  zetInfo(infoEl.hidden);
+});
+document.addEventListener('click', (e) => {
+  if (!infoEl.hidden && !infoEl.contains(e.target)) zetInfo(false);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !infoEl.hidden) {
+    zetInfo(false);
+    infoKnopEl.focus();
+  }
+});
+
+beroepSelectEl.addEventListener('change', () => kiesBeroep(beroepSelectEl.value));
+document.querySelectorAll('[data-regio]').forEach((el) => { el.textContent = REGIO; });
 
 // ---------- Start ----------
 
@@ -344,14 +356,13 @@ schemaEl.addEventListener('keydown', (e) => {
   kies(blok.dataset.id);
 });
 
-document.querySelector('#regio').textContent = REGIO;
 tekenSchema();
 tekenPaneel();
 
 laadGegevens()
   .then((gegevens) => {
     Object.assign(staat, gegevens);
-    tekenBeroepen();
+    vulBeroepKeuze();
     tekenPaneel();
   })
   .catch((fout) => {

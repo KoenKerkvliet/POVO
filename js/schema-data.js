@@ -1,9 +1,21 @@
 // De vorm van het doorstroomschema: blokken, pijlen en standaardteksten.
-// Coördinaten horen bij de viewBox van het SVG (0 90 1230 710).
-// De hoogte van de kolommen = aantal leerjaren (64 px per jaar, grondlijn op y = 700).
+// De hoogte van de kolommen = aantal leerjaren (JAAR_PX per jaar, grondlijn op y = GROND_Y).
+// Alle hoogtes zijn afgeleid van de constanten hieronder, zodat het schema met JAAR_PX meegroeit.
 
-export const JAAR_PX = 64;
-export const GROND_Y = 700;
+export const JAAR_PX = 108;
+
+const RIJ_Y = 60; // bovenkant van de bovenste rij: werk, hbo, wo en de mbo-balk
+const RIJ_H = 100; // hoogte van werk, hbo en wo
+const MBO_H = 140; // hoogte van de mbo-balk
+const PIJL_RUIMTE = 66; // ruimte voor de pijl tussen vwo en wo
+
+export const GROND_Y = RIJ_Y + RIJ_H + PIJL_RUIMTE + 6 * JAAR_PX;
+const jaarY = (jaren) => GROND_Y - jaren * JAAR_PX;
+
+const BASIS_Y = GROND_Y + 16;
+const BASIS_H = 66;
+
+export const SCHEMA_VIEWBOX = [0, RIJ_Y - 46, 1230, BASIS_Y + BASIS_H + 14 - (RIJ_Y - 46)].join(' ');
 
 // Elke route heeft een eigen kleur. Bewust geen kleurverloop van licht naar donker,
 // zodat geen enkel blok "belangrijker" lijkt dan een ander.
@@ -38,45 +50,64 @@ export const MBO_NIVEAUS = [
 
 // Eenvoudige blokken. 'tekst': [regel, y, lettergrootte, vet?]
 export const BLOKKEN = [
-  { id: 'basisschool', kleur: KLEUREN.basis, x: 90, y: 716, w: 1110, h: 66,
-    tekst: [['basisschool', 746, 26, true], ['8 jaar', 770, 16, false]] },
-  { id: 'pro', kleur: KLEUREN.pro, x: 90, y: 380, w: 140, h: 320,
-    verlenging: { y: 316, h: 64 }, // gestippeld stuk: sommige leerlingen doen er een jaar langer over
-    tekst: [['praktijk', 424, 22, true], ['onderwijs', 450, 22, true], ['5/6 jaar', 480, 16, false]] },
-  { id: 'havo', kleur: KLEUREN.havo, x: 846, y: 380, w: 150, h: 320,
-    tekst: [['havo', 426, 30, true], ['5 jaar', 454, 16, false]] },
-  { id: 'vwo', kleur: KLEUREN.vwo, x: 1050, y: 316, w: 150, h: 384,
-    tekst: [['vwo', 362, 30, true], ['6 jaar', 390, 16, false]] },
-  { id: 'werk', kleur: KLEUREN.werk, x: 90, y: 150, w: 140, h: 100,
-    tekst: [['Werk of', 196, 22, true], ['Werken', 222, 22, true]] },
-  { id: 'hbo', kleur: KLEUREN.hbo, x: 846, y: 150, w: 150, h: 100,
-    tekst: [['hbo', 200, 30, true], ['hogeschool', 226, 15, false]] },
-  { id: 'wo', kleur: KLEUREN.wo, x: 1050, y: 150, w: 150, h: 100,
-    tekst: [['wo', 200, 30, true], ['universiteit', 226, 15, false]] },
+  { id: 'basisschool', kleur: KLEUREN.basis, x: 90, y: BASIS_Y, w: 1110, h: BASIS_H,
+    tekst: [['basisschool', BASIS_Y + 30, 26, true], ['8 jaar', BASIS_Y + 54, 16, false]] },
+  { id: 'pro', kleur: KLEUREN.pro, x: 90, y: jaarY(5), w: 140, h: 5 * JAAR_PX,
+    verlenging: { y: jaarY(6), h: JAAR_PX }, // gestippeld stuk: sommige leerlingen doen er een jaar langer over
+    tekst: [['praktijk', jaarY(5) + 44, 22, true], ['onderwijs', jaarY(5) + 70, 22, true], ['5/6 jaar', jaarY(5) + 100, 16, false]] },
+  { id: 'havo', kleur: KLEUREN.havo, x: 846, y: jaarY(5), w: 150, h: 5 * JAAR_PX,
+    tekst: [['havo', jaarY(5) + 46, 30, true], ['5 jaar', jaarY(5) + 74, 16, false]] },
+  { id: 'vwo', kleur: KLEUREN.vwo, x: 1050, y: jaarY(6), w: 150, h: 6 * JAAR_PX,
+    tekst: [['vwo', jaarY(6) + 46, 30, true], ['6 jaar', jaarY(6) + 74, 16, false]] },
+  { id: 'werk', kleur: KLEUREN.werk, x: 90, y: RIJ_Y, w: 140, h: RIJ_H,
+    tekst: [['Werk of', RIJ_Y + 46, 22, true], ['Werken', RIJ_Y + 72, 22, true]] },
+  { id: 'hbo', kleur: KLEUREN.hbo, x: 846, y: RIJ_Y, w: 150, h: RIJ_H,
+    tekst: [['hbo', RIJ_Y + 50, 30, true], ['hogeschool', RIJ_Y + 76, 15, false]] },
+  { id: 'wo', kleur: KLEUREN.wo, x: 1050, y: RIJ_Y, w: 150, h: RIJ_H,
+    tekst: [['wo', RIJ_Y + 50, 30, true], ['universiteit', RIJ_Y + 76, 15, false]] },
 ];
 
-export const VMBO = { id: 'vmbo', kleur: KLEUREN.vmbo, x: VMBO_X, y: 444, w: 520, h: 256,
-  tekst: [['vmbo', 656, 30, true], ['4 jaar', 682, 16, false]] };
+const LEERWEG_Y = jaarY(4) + 14;
+const LEERWEG_H = 152;
 
-export const MBO = { id: 'mbo', kleur: KLEUREN.mbo, x: VMBO_X, y: 150, w: 520, h: 140,
-  tekst: [['mbo', 180, 22, true]] };
+export const VMBO = { id: 'vmbo', kleur: KLEUREN.vmbo, x: VMBO_X, y: jaarY(4), w: 520, h: 4 * JAAR_PX,
+  tekst: [['vmbo', LEERWEG_Y + LEERWEG_H + 56, 30, true], ['4 jaar', LEERWEG_Y + LEERWEG_H + 82, 16, false]] };
+
+export const MBO = { id: 'mbo', kleur: KLEUREN.mbo, x: VMBO_X, y: RIJ_Y, w: 520, h: MBO_H,
+  tekst: [['mbo', RIJ_Y + 30, 22, true]] };
 
 export function leerwegGeometrie(i) {
-  return { x: VMBO_X + 6 + LEERWEG_B * i, y: 458, w: LEERWEG_B - 12, h: 152 };
+  return { x: VMBO_X + 6 + LEERWEG_B * i, y: LEERWEG_Y, w: LEERWEG_B - 12, h: LEERWEG_H };
 }
 export function mboGeometrie(i) {
-  return { x: VMBO_X + 6 + LEERWEG_B * i, y: 194, w: LEERWEG_B - 12, h: 86 };
+  return { x: VMBO_X + 6 + LEERWEG_B * i, y: RIJ_Y + 44, w: LEERWEG_B - 12, h: 86 };
 }
 
-// Hulp: gebogen pijl omhoog van het vmbo naar de mbo-balk.
-const omhoog = (van, naar) => `M ${van} 438 C ${van} 380, ${naar} 352, ${naar} 296`;
-// Hulp: kleine boog boven de mbo-balk (van niveau n naar n+1).
-const boog = (van, naar) => `M ${van} 146 C ${van + 3} 110, ${naar - 3} 110, ${naar} 146`;
+// ---------- Pijlen ----------
+
+const KOP = 6; // afstand tussen een blok en het begin of de punt van een pijl
+const rijOnder = RIJ_Y + RIJ_H + KOP; // onderkant van werk, hbo en wo (+ ruimte)
+const mboOnder = RIJ_Y + MBO_H + KOP;
+const mboMidden = RIJ_Y + 112; // hoogte waarop pijlen de zijkant van de mbo-balk raken
+const lijnY = RIJ_Y + 50; // vaste hoogte van de pijlen tussen mbo, hbo en wo
+
+// Gebogen pijl omhoog van het vmbo naar de mbo-balk.
+function omhoog(van, naar) {
+  const y0 = jaarY(4) - KOP;
+  const y1 = mboOnder;
+  const stap = y0 - y1;
+  return `M ${van} ${y0} C ${van} ${y0 - 0.41 * stap}, ${naar} ${y0 - 0.61 * stap}, ${naar} ${y1}`;
+}
+// Kleine boog boven de mbo-balk (van niveau n naar n+1).
+const boog = (van, naar) => `M ${van} ${RIJ_Y - 4} C ${van + 3} ${RIJ_Y - 40}, ${naar - 3} ${RIJ_Y - 40}, ${naar} ${RIJ_Y - 3}`;
+
+// Hoogte waarop tl -> havo en havo -> vwo lopen: halverwege de leerweg-blokjes.
+const zijY = LEERWEG_Y + LEERWEG_H / 2;
 
 // van = blok waar de pijl uit komt, naar = blok waar je terechtkomt.
 export const PIJLEN = [
-  { van: 'pro', naar: 'werk', d: 'M 160 310 L 160 256' },
-  { van: 'pro', naar: 'mbo1', d: 'M 205 310 C 205 262, 225 262, 262 262' },
+  { van: 'pro', naar: 'werk', d: `M 160 ${jaarY(6) - KOP} L 160 ${rijOnder}` },
+  { van: 'pro', naar: 'mbo1', d: `M 205 ${jaarY(6) - KOP} C 205 ${mboMidden}, 225 ${mboMidden}, 262 ${mboMidden}` },
 
   { van: 'vmbo-bbl', naar: 'mbo2', d: omhoog(335, 465) },
   { van: 'vmbo-kbl', naar: 'mbo3', d: omhoog(445, 575) },
@@ -84,20 +115,20 @@ export const PIJLEN = [
   { van: 'vmbo-gl', naar: 'mbo3', d: omhoog(590, 615) },
   { van: 'vmbo-gl', naar: 'mbo4', d: omhoog(625, 725) },
   { van: 'vmbo-tl', naar: 'mbo4', d: omhoog(735, 760) },
-  { van: 'vmbo-tl', naar: 'havo', d: 'M 794 520 C 816 520, 826 505, 842 505' },
+  { van: 'vmbo-tl', naar: 'havo', d: `M 794 ${zijY} C 816 ${zijY}, 826 ${zijY - 15}, 842 ${zijY - 15}` },
 
   { van: 'mbo1', naar: 'mbo2', d: boog(375, 425) },
   { van: 'mbo2', naar: 'mbo3', d: boog(505, 555) },
   { van: 'mbo3', naar: 'mbo4', d: boog(635, 685) },
-  { van: 'mbo4', naar: 'hbo', d: 'M 794 200 L 842 200' },
+  { van: 'mbo4', naar: 'hbo', d: `M 794 ${lijnY} L 842 ${lijnY}` },
 
-  { van: 'havo', naar: 'mbo4', d: 'M 880 374 C 880 300, 850 262, 797 262' },
-  { van: 'havo', naar: 'hbo', d: 'M 940 374 L 940 256' },
-  { van: 'havo', naar: 'vwo', d: 'M 1000 520 C 1018 520, 1030 505, 1046 505' },
+  { van: 'havo', naar: 'mbo4', d: `M 880 ${jaarY(5) - KOP} C 880 ${jaarY(5) - KOP - 0.66 * (jaarY(5) - KOP - mboMidden)}, 850 ${mboMidden}, 797 ${mboMidden}` },
+  { van: 'havo', naar: 'hbo', d: `M 940 ${jaarY(5) - KOP} L 940 ${rijOnder}` },
+  { van: 'havo', naar: 'vwo', d: `M 1000 ${zijY} C 1018 ${zijY}, 1030 ${zijY - 15}, 1046 ${zijY - 15}` },
 
-  { van: 'vwo', naar: 'hbo', d: 'M 1075 310 C 1075 280, 1000 285, 980 256' },
-  { van: 'vwo', naar: 'wo', d: 'M 1125 310 L 1125 256' },
-  { van: 'hbo', naar: 'wo', d: 'M 1000 200 L 1044 200' },
+  { van: 'vwo', naar: 'hbo', d: `M 1075 ${jaarY(6) - KOP} C 1075 ${jaarY(6) - 36}, 1000 ${jaarY(6) - 31}, 980 ${rijOnder}` },
+  { van: 'vwo', naar: 'wo', d: `M 1125 ${jaarY(6) - KOP} L 1125 ${rijOnder}` },
+  { van: 'hbo', naar: 'wo', d: `M 1000 ${lijnY} L 1044 ${lijnY}` },
 ];
 
 // Groepen: klik je op het vmbo of de mbo-balk, dan tellen de onderdelen mee.

@@ -1,15 +1,17 @@
 :root {
-  --achtergrond: #f6f7fb;
+  --achtergrond: #f1f3f9;
   --kaart: #ffffff;
   --tekst: #0f172a;
   --tekst-zacht: #475569;
   --lijn: #dbe0ea;
-  --accent: #0f172a;
+  --kop: #0f172a;
+  --amber: #b45309;
   --straal: 14px;
   color-scheme: light;
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -21,54 +23,163 @@ body {
 
 a { color: inherit; }
 
-/* ---------- Pagina ---------- */
+button:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 3px solid #fbbf24;
+  outline-offset: 2px;
+}
 
-.topbalk {
+/* ---------- Kop (hoofdpagina) ---------- */
+
+.kop {
+  position: relative;
   display: flex;
-  align-items: baseline;
-  gap: 14px;
-  padding: 14px 24px 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+  padding: 12px 20px 14px;
+  background: var(--kop);
+  color: #fff;
 }
-.topbalk h1 { margin: 0; font-size: 1.5rem; }
-.regio {
-  font-size: .95rem;
-  color: var(--tekst-zacht);
-  background: var(--kaart);
-  border: 1px solid var(--lijn);
-  border-radius: 999px;
-  padding: 2px 12px;
+/* Kleurstreep onderaan: de kleuren van alle routes, naast elkaar. */
+.kop::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #0f766e 0 20%, #c2410c 20% 40%, #7c3aed 40% 60%, #1d4ed8 60% 80%, #15803d 80% 100%);
 }
 
-.voet { padding: 4px 24px 18px; font-size: .85rem; color: var(--tekst-zacht); text-align: right; }
+.merk { display: flex; align-items: center; gap: 12px; }
+.logo { width: 38px; height: 38px; flex: none; }
+.kop h1 { margin: 0; font-size: 1.4rem; line-height: 1.15; letter-spacing: .01em; }
+.ondertitel { margin: 0; font-size: .85rem; color: rgba(255, 255, 255, .72); }
 
-/* ---------- Paneel bovenin ---------- */
+.kop-acties { display: flex; align-items: center; gap: 14px; }
+
+.beroep-keuze { display: flex; align-items: center; gap: 10px; font-size: .9rem; font-weight: 600; }
+.beroep-keuze span { color: rgba(255, 255, 255, .8); }
+.beroep-keuze select {
+  font: inherit;
+  font-weight: 600;
+  min-width: 230px;
+  max-width: 100%;
+  padding: 8px 36px 8px 14px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--tekst);
+  background: #fff;
+  cursor: pointer;
+}
+.beroep-keuze select:hover { border-color: #fbbf24; }
+
+.info-wrap { position: relative; }
+.info-knop {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, .55);
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+.info-knop:hover { background: rgba(255, 255, 255, .15); }
+.info-knop[aria-expanded="true"] { background: #fff; color: var(--kop); border-color: #fff; }
+
+.info-kaart {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 14px);
+  z-index: 30;
+  width: min(400px, calc(100vw - 28px));
+  padding: 18px 20px;
+  border-radius: var(--straal);
+  background: #fff;
+  color: var(--tekst);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, .35);
+}
+.info-kaart::before {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  transform: rotate(45deg);
+}
+.info-kaart h2 { margin: 0 0 6px; font-size: 1.2rem; }
+.info-kaart p { margin: 0 0 8px; }
+.info-kaart .noot { color: var(--tekst-zacht); }
+.info-voet { margin: 12px 0 0 !important; font-size: .8rem; text-align: right; color: var(--tekst-zacht); }
+
+/* ---------- Canvas: kaart (kolom 1 en 2) + informatie (kolom 3) ---------- */
+
+body.start {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.canvas {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  padding: 14px 18px 16px;
+}
+
+.kaart { min-width: 0; min-height: 0; display: flex; }
 
 .paneel {
-  margin: 8px 24px 4px;
-  padding: 16px 20px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px;
   background: var(--kaart);
   border: 1px solid var(--lijn);
   border-radius: var(--straal);
-  min-height: 200px;
-  display: grid;
-  grid-template-columns: minmax(260px, 1fr);
-  gap: 8px 28px;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
-.paneel.met-scholen { grid-template-columns: minmax(260px, 2fr) minmax(0, 3fr); }
-.paneel h2 { margin: 0 0 6px; font-size: 1.35rem; }
+.paneel-deel + .paneel-deel { padding-top: 18px; border-top: 1px solid var(--lijn); }
+.paneel h2 { margin: 0 0 6px; font-size: 1.35rem; line-height: 1.2; }
 .paneel p { margin: 0 0 8px; }
+
+.leeg-paneel { margin: auto 0; text-align: center; color: var(--tekst-zacht); padding: 24px 8px; }
+.leeg-kop { font-size: 1.3rem; font-weight: 800; color: var(--tekst); margin-bottom: 4px !important; }
+
+.kop-rij { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.sluit {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--lijn);
+  border-radius: 50%;
+  background: var(--kaart);
+  color: var(--tekst-zacht);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.sluit:hover { background: var(--achtergrond); color: var(--tekst); }
 
 .info { border-left: 8px solid var(--kleur, var(--lijn)); padding-left: 14px; }
 .info .duur {
-  margin-left: 10px;
+  display: block;
+  margin-top: 2px;
   font-size: .85rem;
   font-weight: 600;
   color: var(--tekst-zacht);
-  vertical-align: middle;
 }
-
-.intro .noot { color: var(--tekst-zacht); max-width: 70ch; }
 
 .hierna { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
 .hierna-label { font-size: .9rem; color: var(--tekst-zacht); }
@@ -86,7 +197,9 @@ a { color: inherit; }
 }
 .chip:hover { filter: brightness(1.12); }
 
-.scholen-kop { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 8px; }
+/* ---------- Scholen ---------- */
+
+.scholen-kop { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 10px; }
 .scholen h3 { margin: 0; font-size: 1.05rem; }
 .aantal {
   margin-left: 8px;
@@ -113,10 +226,8 @@ a { color: inherit; }
   list-style: none;
   margin: 0;
   padding: 0;
-  max-height: 150px;
-  overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 8px;
 }
 .school {
@@ -135,7 +246,6 @@ a { color: inherit; }
 
 .leeg, .demo, .fout { color: var(--tekst-zacht); font-size: .9rem; }
 .demo {
-  grid-column: 1 / -1;
   margin: 0;
   padding: 4px 10px;
   background: #fef3c7;
@@ -144,39 +254,16 @@ a { color: inherit; }
 }
 .fout { color: #b91c1c; }
 
-
-/* ---------- Beroepen ---------- */
-
-.beroepen {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 24px 0;
-}
-.beroepen[hidden] { display: none; }
-.beroepen-label { font-size: .95rem; color: var(--tekst-zacht); margin-right: 4px; }
-.beroep-chip {
-  font: inherit;
-  font-weight: 700;
-  padding: 5px 16px;
-  border-radius: 999px;
-  border: 2px solid #b45309;
-  background: var(--kaart);
-  color: #92400e;
-  cursor: pointer;
-}
-.beroep-chip:hover { background: #fffbeb; }
-.beroep-chip[aria-pressed="true"] { background: #b45309; color: #fff; }
+/* ---------- Beroep en routes ---------- */
 
 .beroep h2 { color: #92400e; }
-.routes { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.routes { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .route {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 6px;
-  padding: 3px 8px;
+  gap: 5px 6px;
+  padding: 6px 8px;
   border: 2px solid transparent;
   border-radius: 12px;
 }
@@ -191,7 +278,7 @@ a { color: inherit; }
   background: var(--kaart);
   cursor: pointer;
 }
-.route-knop[aria-pressed="true"] { background: #b45309; border-color: #b45309; color: #fff; }
+.route-knop[aria-pressed="true"] { background: var(--amber); border-color: var(--amber); color: #fff; }
 .pijltje { color: var(--tekst-zacht); font-weight: 700; }
 .stap {
   font: inherit;
@@ -213,25 +300,20 @@ a { color: inherit; }
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #b45309;
+  background: var(--amber);
   border: 2px solid #fff;
   font-size: .72rem;
 }
 .stap:hover { filter: brightness(1.12); }
-.stap.eind { background: #fff; color: #92400e; border: 2px solid #b45309; padding: 1px 12px; cursor: default; font-weight: 800; }
-.zij { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.stap.eind { background: #fff; color: #92400e; border: 2px solid var(--amber); padding: 1px 12px; cursor: default; font-weight: 800; }
 
 /* ---------- Schema ---------- */
 
-.schema-wrap { padding: 4px 24px 0; overflow-x: auto; }
 #schema {
   display: block;
   width: 100%;
-  min-width: 860px;
-  max-width: 1400px;
-  margin: 0 auto;
-  height: auto;
-  max-height: max(480px, calc(100vh - 330px));
+  height: 100%;
+  min-width: 0;
   font-family: inherit;
   user-select: none;
 }
@@ -280,23 +362,35 @@ a { color: inherit; }
 #schema .cel.actief > .vorm { fill: rgba(255, 255, 255, .38); stroke: #0f172a; stroke-width: 5; }
 #schema .cel:focus-visible > .vorm { stroke: #fff; stroke-width: 4; stroke-dasharray: 8 5; }
 
-
 /* routes naar een beroep */
 #schema .blok.op-route > .vorm { stroke: #f59e0b; stroke-width: 7; }
 #schema .blok.actief > .vorm { stroke: #0f172a; stroke-width: 5; }
 #schema .blok.gedimd { opacity: .35; }
 #schema.heeft-route .pijl:not(.route):not(.actief) { opacity: .15; }
-#schema .pijl.route { opacity: 1; stroke: #b45309; stroke-width: 7; marker-end: url(#kop-route); }
-#schema .stapnummer circle { fill: #b45309; stroke: #fff; stroke-width: 3; }
+#schema .pijl.route { opacity: 1; stroke: var(--amber); stroke-width: 7; marker-end: url(#kop-route); }
+#schema .stapnummer circle { fill: var(--amber); stroke: #fff; stroke-width: 3; }
 
-/* ---------- Kleine schermen ---------- */
+/* ---------- Kleinere schermen: kaart boven, informatie eronder ---------- */
 
-@media (max-width: 760px) {
-  .beroepen { margin: 4px 14px 0; }
-  .topbalk, .paneel, .schema-wrap { margin-left: 0; margin-right: 0; padding-left: 14px; padding-right: 14px; }
-  .paneel { margin: 8px 14px; padding: 14px; }
-  .paneel.met-scholen { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 980px) {
+  body.start { height: auto; overflow: visible; }
+  .canvas { grid-template-columns: minmax(0, 1fr); padding: 12px; }
+  .kaart { overflow-x: auto; }
+  #schema { height: auto; min-width: 760px; }
+  .paneel { max-height: none; overflow: visible; }
+  .kop { padding: 12px 14px 14px; }
+  .beroep-keuze select { min-width: 180px; }
 }
+
+/* ---------- Beheerpagina (gedeelde kop) ---------- */
+
+.topbalk {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 24px 6px;
+}
+.topbalk h1 { margin: 0; font-size: 1.5rem; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }

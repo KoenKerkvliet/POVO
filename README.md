@@ -20,7 +20,7 @@ Zolang de sleutel leeg is, laat de website voorbeeldscholen en voorbeeldberoepen
 
 1. Plak `supabase/stap2-beroepen.sql` in de Supabase SQL Editor en klik op *Run*. Er worden twee voorbeelden toegevoegd (kapper en huisarts) die je in het dashboard kunt controleren en aanpassen.
 2. In het dashboard, tab *Beroepen*, maak je beroepen aan. Per beroep stel je een of meer routes samen: kies na de basisschool de eerste stap, en daarna steeds de volgende. Je kunt alleen stappen kiezen waar in het schema een pijl naartoe loopt.
-3. Op de website verschijnt boven het schema de rij *Of kies een beroep*. Kinderen zien dan de routes en in het schema de genummerde stappen. Klikken op een stap toont de uitleg en de scholen.
+3. Op de website verschijnt in de kop een keuzelijst *Beroep*. Kinderen zien dan de routes en in het schema de genummerde stappen. Klikken op een stap toont de uitleg en de scholen.
 
 ## Lokaal bekijken
 

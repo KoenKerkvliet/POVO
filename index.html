@@ -7,23 +7,55 @@
   <meta name="description" content="Een interactief schema over de wegen na de basisschool en de scholen in de regio.">
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-  <header class="topbalk">
-    <h1>Na de basisschool</h1>
-    <span class="regio" id="regio"></span>
+<body class="start">
+  <header class="kop">
+    <div class="merk">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="2" y="2" width="12" height="12" rx="3" fill="#0f766e"/>
+        <rect x="18" y="2" width="12" height="12" rx="3" fill="#c2410c"/>
+        <rect x="2" y="18" width="12" height="12" rx="3" fill="#7c3aed"/>
+        <rect x="18" y="18" width="12" height="12" rx="3" fill="#1d4ed8"/>
+      </svg>
+      <div>
+        <h1>Na de basisschool</h1>
+        <p class="ondertitel">Welke wegen zijn er? <span data-regio></span></p>
+      </div>
+    </div>
+
+    <div class="kop-acties">
+      <label class="beroep-keuze" id="beroep-keuze" hidden>
+        <span>Beroep</span>
+        <select id="beroep-select"></select>
+      </label>
+
+      <div class="info-wrap">
+        <button type="button" id="info-knop" class="info-knop" aria-label="Uitleg" aria-expanded="false" aria-controls="info">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+            <circle cx="12" cy="7.6" r="1.4" fill="currentColor"/>
+            <path d="M12 11v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div id="info" class="info-kaart" role="dialog" aria-label="Uitleg" hidden>
+          <h2>Klik op een blok</h2>
+          <p>Zie welke scholen er in <span data-regio></span> zijn en waar je daarna naartoe kunt.</p>
+          <p>Kies bovenin een beroep om te zien welke wegen er naartoe leiden.</p>
+          <p class="noot">
+            Elk blok is een eigen weg, en alle wegen zijn even waardevol. Het gaat niet om hoger of lager, maar om wat bij jou past.
+            De hoogte van een blok laat alleen zien hoeveel jaar het duurt.
+          </p>
+          <p class="info-voet"><a href="beheer.html">Beheer</a></p>
+        </div>
+      </div>
+    </div>
   </header>
 
-  <nav id="beroepen" class="beroepen" aria-label="Beroepen" hidden></nav>
-
-  <section id="paneel" class="paneel" aria-live="polite"></section>
-
-  <main class="schema-wrap">
-    <svg id="schema" viewBox="0 90 1230 710" role="group" aria-label="Schema met de wegen na de basisschool"></svg>
-  </main>
-
-  <footer class="voet">
-    <a href="beheer.html">Beheer</a>
-  </footer>
+  <div class="canvas">
+    <main class="kaart">
+      <svg id="schema" viewBox="0 14 1230 956" role="group" aria-label="Schema met de wegen na de basisschool"></svg>
+    </main>
+    <aside id="paneel" class="paneel" aria-live="polite" aria-label="Uitleg bij je keuze"></aside>
+  </div>
 
   <script type="module" src="js/app.js"></script>
 </body>
