@@ -60,7 +60,7 @@ export const BLOKKEN = [
   { id: 'vwo', kleur: KLEUREN.vwo, x: 1050, y: jaarY(6), w: 150, h: 6 * JAAR_PX,
     tekst: [['vwo', jaarY(6) + 46, 30, true], ['6 jaar', jaarY(6) + 74, 16, false]] },
   { id: 'werk', kleur: KLEUREN.werk, x: 90, y: RIJ_Y, w: 140, h: RIJ_H,
-    tekst: [['Werk of', RIJ_Y + 46, 22, true], ['Werken', RIJ_Y + 72, 22, true]] },
+    tekst: [['Werk', RIJ_Y + RIJ_H / 2 + 9, 28, true]] },
   { id: 'hbo', kleur: KLEUREN.hbo, x: 846, y: RIJ_Y, w: 150, h: RIJ_H,
     tekst: [['hbo', RIJ_Y + 50, 30, true], ['hogeschool', RIJ_Y + 76, 15, false]] },
   { id: 'wo', kleur: KLEUREN.wo, x: 1050, y: RIJ_Y, w: 150, h: RIJ_H,
@@ -155,7 +155,7 @@ export const NIVEAU_INFO = {
   mbo4: { naam: 'Mbo niveau 4', kort: 'mbo niveau 4', duur: '3 tot 4 jaar', kleur: KLEUREN.mbo },
   hbo: { naam: 'Hbo (hogeschool)', kort: 'hbo', duur: 'meestal 4 jaar', kleur: KLEUREN.hbo },
   wo: { naam: 'Wo (universiteit)', kort: 'wo', duur: 'bachelor 3 jaar + master', kleur: KLEUREN.wo },
-  werk: { naam: 'Werk of Werken', kort: 'Werk of Werken', duur: '', kleur: KLEUREN.werk },
+  werk: { naam: 'Werk', kort: 'werk', duur: '', kleur: KLEUREN.werk },
 };
 
 // Standaardteksten. Je kunt ze overschrijven in het dashboard (tabel 'niveaus').

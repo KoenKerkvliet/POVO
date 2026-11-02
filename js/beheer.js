@@ -10,7 +10,7 @@ const uitlogKnop = document.querySelector('#uitloggen');
 
 const sb = SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-const staat = { tab: 'scholen', scholen: [], teksten: {}, beroepen: [], beroepenFout: null, zoek: '', ingelogd: false };
+const staat = { tab: 'scholen', scholen: [], teksten: {}, beroepen: [], beroepenFout: null, zoek: '', ingelogd: null };
 
 // Welke niveaus je bij een school kunt aanvinken.
 const KEUZES = [

@@ -55,7 +55,7 @@ insert into public.niveaus (id, naam, heeft_scholen, volgorde) values
   ('mbo4',        'Mbo niveau 4',                             false, 14),
   ('hbo',         'Hbo',                                      false, 15),
   ('wo',          'Wo (universiteit)',                        false, 16),
-  ('werk',        'Werk of Werken',                           false, 17)
+  ('werk',        'Werk',                                     false, 17)
 on conflict (id) do nothing;
 
 -- 3. Beveiliging -----------------------------------------------
