@@ -2,9 +2,11 @@
 // De hoogte van de kolommen = aantal leerjaren (JAAR_PX per jaar, grondlijn op y = GROND_Y).
 // Alle hoogtes zijn afgeleid van de constanten hieronder, zodat het schema met JAAR_PX meegroeit.
 
-export const JAAR_PX = 108;
+export const JAAR_PX = 100;
 
-const RIJ_Y = 60; // bovenkant van de bovenste rij: werk, hbo, wo en de mbo-balk
+const WERK_RIJ_Y = 20; // bovenste rij: 'Werk' na het mbo, hbo en wo
+const WERK_RIJ_H = 56;
+const RIJ_Y = 130; // rij daaronder: werk (na pr.o.), de mbo-balk, hbo en wo
 const RIJ_H = 100; // hoogte van werk, hbo en wo
 const MBO_H = 140; // hoogte van de mbo-balk
 const PIJL_RUIMTE = 66; // ruimte voor de pijl tussen vwo en wo
@@ -15,7 +17,7 @@ const jaarY = (jaren) => GROND_Y - jaren * JAAR_PX;
 const BASIS_Y = GROND_Y + 16;
 const BASIS_H = 66;
 
-export const SCHEMA_VIEWBOX = [0, RIJ_Y - 46, 1230, BASIS_Y + BASIS_H + 14 - (RIJ_Y - 46)].join(' ');
+export const SCHEMA_VIEWBOX = [0, WERK_RIJ_Y - 10, 1230, BASIS_Y + BASIS_H + 14 - (WERK_RIJ_Y - 10)].join(' ');
 
 // Elke route heeft een eigen kleur. Bewust geen kleurverloop van licht naar donker,
 // zodat geen enkel blok "belangrijker" lijkt dan een ander.
@@ -61,6 +63,10 @@ export const BLOKKEN = [
     tekst: [['vwo', jaarY(6) + 46, 30, true], ['6 jaar', jaarY(6) + 74, 16, false]] },
   { id: 'werk', kleur: KLEUREN.werk, x: 90, y: RIJ_Y, w: 140, h: RIJ_H,
     tekst: [['Werk', RIJ_Y + RIJ_H / 2 + 9, 28, true]] },
+  ...[['werk-mbo', 270, 520], ['werk-hbo', 846, 150], ['werk-wo', 1050, 150]].map(([id, x, w]) => ({
+    id, kleur: KLEUREN.werk, x, y: WERK_RIJ_Y, w, h: WERK_RIJ_H,
+    tekst: [['Werk', WERK_RIJ_Y + WERK_RIJ_H / 2 + 8, 24, true]],
+  })),
   { id: 'hbo', kleur: KLEUREN.hbo, x: 846, y: RIJ_Y, w: 150, h: RIJ_H,
     tekst: [['hbo', RIJ_Y + 50, 30, true], ['hogeschool', RIJ_Y + 76, 15, false]] },
   { id: 'wo', kleur: KLEUREN.wo, x: 1050, y: RIJ_Y, w: 150, h: RIJ_H,
@@ -104,6 +110,9 @@ const boog = (van, naar) => `M ${van} ${RIJ_Y - 4} C ${van + 3} ${RIJ_Y - 40}, $
 // Hoogte van het midden van een klas (1 = eerste klas) in een kolom. Instroompijlen eindigen op de juiste klas.
 const klasY = (klas) => GROND_Y - (klas - 0.5) * JAAR_PX;
 
+// Rechte pijl omhoog van de rij met mbo, hbo en wo naar het werk-vakje erboven.
+const werkPijl = (x) => `M ${x} ${RIJ_Y - KOP} L ${x} ${WERK_RIJ_Y + WERK_RIJ_H + KOP}`;
+
 // van = blok waar de pijl uit komt, naar = blok waar je terechtkomt.
 export const PIJLEN = [
   { van: 'pro', naar: 'werk', d: `M 160 ${jaarY(6) - KOP} L 160 ${rijOnder}` },
@@ -132,6 +141,11 @@ export const PIJLEN = [
   { van: 'vwo', naar: 'hbo', d: `M 1075 ${jaarY(6) - KOP} C 1075 ${jaarY(6) - 36}, 1000 ${jaarY(6) - 31}, 980 ${rijOnder}` },
   { van: 'vwo', naar: 'wo', d: `M 1125 ${jaarY(6) - KOP} L 1125 ${rijOnder}` },
   { van: 'hbo', naar: 'wo', d: `M 1000 ${lijnY} L 1044 ${lijnY}` },
+
+  // Uitstromen naar werk kan na elk mbo-niveau, het hbo en de universiteit.
+  ...[['mbo1', 335], ['mbo2', 465], ['mbo3', 595], ['mbo4', 725]].map(([van, x]) => ({ van, naar: 'werk-mbo', d: werkPijl(x) })),
+  { van: 'hbo', naar: 'werk-hbo', d: werkPijl(921) },
+  { van: 'wo', naar: 'werk-wo', d: werkPijl(1125) },
 ];
 
 // Groepen: klik je op het vmbo of de mbo-balk, dan tellen de onderdelen mee.
@@ -161,6 +175,9 @@ export const NIVEAU_INFO = {
   hbo: { naam: 'Hbo (hogeschool)', kort: 'hbo', duur: 'meestal 4 jaar', kleur: KLEUREN.hbo },
   wo: { naam: 'Wo (universiteit)', kort: 'wo', duur: 'bachelor 3 jaar + master', kleur: KLEUREN.wo },
   werk: { naam: 'Werk', kort: 'werk', duur: '', kleur: KLEUREN.werk },
+  'werk-mbo': { naam: 'Werk', kort: 'werk', duur: '', kleur: KLEUREN.werk },
+  'werk-hbo': { naam: 'Werk', kort: 'werk', duur: '', kleur: KLEUREN.werk },
+  'werk-wo': { naam: 'Werk', kort: 'werk', duur: '', kleur: KLEUREN.werk },
 };
 
 // Standaardteksten. Je kunt ze overschrijven in het dashboard (tabel 'niveaus').
@@ -203,6 +220,12 @@ export const STANDAARD_OMSCHRIJVING = {
     'Je gaat aan het werk, soms met begeleiding. Je kunt ook werken en tegelijk leren, bijvoorbeeld op een leerwerkplek.',
 };
 
+// Werk na het mbo, hbo of de universiteit heeft dezelfde uitleg.
+for (const id of ['werk-mbo', 'werk-hbo', 'werk-wo']) {
+  STANDAARD_OMSCHRIJVING[id] =
+    'Met je diploma kun je gaan werken. Je hoeft dus niet altijd door te leren naar een volgend niveau. Later kun je altijd nog verder leren, bijvoorbeeld met een cursus of een nieuwe opleiding.';
+}
+
 // Niveaus waarvoor scholen worden getoond.
 export const MET_SCHOLEN = ['pro', 'vmbo', 'vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl', 'havo', 'vwo', 'gymnasium'];
 
@@ -226,7 +249,7 @@ export const START_OPTIES = ['pro', 'vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl'
 
 // Welke stappen er direct na een onderdeel mogelijk zijn (volgens de pijlen in het schema).
 export function volgendeStappen(id) {
-  return [...new Set(PIJLEN.filter((p) => p.van === id).map((p) => p.naar))];
+  return [...new Set(PIJLEN.filter((p) => p.van === id).map((p) => p.naar))].filter((naar) => !naar.startsWith('werk-'));
 }
 
 // Hoekpunt van een blok, daar komt het stapnummer van een route.

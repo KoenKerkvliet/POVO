@@ -587,7 +587,7 @@ async function bewaarBeroep(beroep, waarden, routes) {
 // ---------- Teksten ----------
 
 function tekenTeksten() {
-  const items = Object.keys(NIVEAU_INFO).map((id) => {
+  const items = Object.keys(NIVEAU_INFO).filter((id) => !id.startsWith('werk-')).map((id) => {
     const standaard = STANDAARD_OMSCHRIJVING[id] || '';
     const veld = h('textarea', { id: `t-${id}`, rows: 3 });
     veld.value = staat.teksten[id] || standaard;
