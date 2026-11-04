@@ -19,18 +19,59 @@ const BASIS_H = 66;
 
 export const SCHEMA_VIEWBOX = [0, WERK_RIJ_Y - 10, 1230, BASIS_Y + BASIS_H + 14 - (WERK_RIJ_Y - 10)].join(' ');
 
-// Elke route heeft een eigen kleur. Bewust geen kleurverloop van licht naar donker,
-// zodat geen enkel blok "belangrijker" lijkt dan een ander.
+// Elke route heeft een eigen kleur (tint en helderheid zijn voor alle routes gelijk). Bewust geen kleurverloop
+// van licht naar donker, zodat geen enkel blok "belangrijker" lijkt dan een ander.
+// Per kleur: [tint (0-360), kleurkracht]. Alle andere tinten van een kleur worden daaruit afgeleid.
+const PALET = {
+  basisschool: [255, 0.04],
+  pro: [185, 0.11],
+  vmbo: [45, 0.16],
+  mbo: [150, 0.14],
+  havo: [300, 0.17],
+  vwo: [262, 0.17],
+  hbo: [15, 0.17],
+  wo: [345, 0.15],
+  werk: [70, 0.13],
+};
+
+// Welke kleur hoort bij een onderdeel (leerwegen horen bij het vmbo, mbo-niveaus bij het mbo, enzovoort).
+function paletSleutel(id) {
+  if (id.startsWith('vmbo')) return 'vmbo';
+  if (id.startsWith('mbo')) return 'mbo';
+  if (id.startsWith('werk')) return 'werk';
+  if (id === 'gymnasium') return 'vwo';
+  return PALET[id] ? id : 'basisschool';
+}
+
+// Alle tinten van de kleur van een onderdeel, als CSS-kleuren.
+export function paletVan(id) {
+  const [h, c] = PALET[paletSleutel(id)];
+  return {
+    tint: `oklch(0.955 ${c * 0.25} ${h})`, // zachte vulling
+    line: `oklch(0.85 ${c * 0.5} ${h})`, // rand
+    ink: `oklch(0.38 ${c * 0.8} ${h})`, // tekst
+    solid: `oklch(0.6 ${c} ${h})`, // volle kleur (aangeklikt)
+    deep: `oklch(0.47 ${c} ${h})`, // donkere rand
+    ring: `oklch(0.88 ${c * 0.45} ${h})`, // lichte gloed
+    schaduw: `oklch(0.4 ${c} ${h} / 0.45)`,
+  };
+}
+
+// CSS-variabelen van een onderdeel, voor in een style-attribuut.
+export function paletStijl(id) {
+  return Object.entries(paletVan(id)).map(([naam, waarde]) => `--${naam}: ${waarde}`).join('; ');
+}
+
 export const KLEUREN = {
-  basis: '#475569',
-  pro: '#0f766e',
-  vmbo: '#c2410c',
-  havo: '#7c3aed',
-  vwo: '#1d4ed8',
-  mbo: '#15803d',
-  hbo: '#be123c',
-  wo: '#9d174d',
-  werk: '#a16207',
+  basis: paletVan('basisschool').solid,
+  pro: paletVan('pro').solid,
+  vmbo: paletVan('vmbo').solid,
+  havo: paletVan('havo').solid,
+  vwo: paletVan('vwo').solid,
+  mbo: paletVan('mbo').solid,
+  hbo: paletVan('hbo').solid,
+  wo: paletVan('wo').solid,
+  werk: paletVan('werk').solid,
 };
 
 const VMBO_X = 270;
@@ -179,6 +220,32 @@ export const NIVEAU_INFO = {
   'werk-hbo': { naam: 'Werk', kort: 'werk', duur: '', kleur: KLEUREN.werk },
   'werk-wo': { naam: 'Werk', kort: 'werk', duur: '', kleur: KLEUREN.werk },
 };
+
+// Ondertitel (en soms een kortere titel) voor in het infopaneel.
+const EXTRA = {
+  basisschool: { sub: 'groep 1 t/m 8' },
+  pro: { sub: 'leren door te doen' },
+  vmbo: { sub: 'voorbereidend middelbaar beroepsonderwijs' },
+  'vmbo-bbl': { titel: 'Basisberoepsgerichte leerweg', sub: 'vmbo bbl' },
+  'vmbo-kbl': { titel: 'Kaderberoepsgerichte leerweg', sub: 'vmbo kbl' },
+  'vmbo-gl': { titel: 'Gemengde leerweg', sub: 'vmbo gl' },
+  'vmbo-tl': { titel: 'Theoretische leerweg', sub: 'vmbo tl, ook wel mavo' },
+  havo: { sub: 'hoger algemeen voortgezet onderwijs' },
+  vwo: { sub: 'atheneum of gymnasium' },
+  gymnasium: { sub: 'vwo met Latijn en Grieks' },
+  mbo: { sub: 'middelbaar beroepsonderwijs' },
+  mbo1: { sub: 'Entreeopleiding' },
+  mbo2: { sub: 'Basisberoepsopleiding' },
+  mbo3: { sub: 'Vakopleiding' },
+  mbo4: { sub: 'Middenkaderopleiding' },
+  hbo: { sub: 'hogeschool' },
+  wo: { sub: 'universiteit' },
+  werk: { sub: 'na het praktijkonderwijs' },
+  'werk-mbo': { sub: 'na het mbo' },
+  'werk-hbo': { sub: 'na het hbo' },
+  'werk-wo': { sub: 'na de universiteit' },
+};
+for (const [id, extra] of Object.entries(EXTRA)) Object.assign(NIVEAU_INFO[id], extra);
 
 // Standaardteksten. Je kunt ze overschrijven in het dashboard (tabel 'niveaus').
 export const STANDAARD_OMSCHRIJVING = {

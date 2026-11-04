@@ -38,6 +38,10 @@ en open http://localhost:5173.
 
 Het zijn alleen statische bestanden. Je kunt de map bijvoorbeeld met GitHub Pages, Netlify of Vercel publiceren; er is geen build-stap nodig.
 
+## Lettertypen
+
+De site gebruikt *Atkinson Hyperlegible* en *Bricolage Grotesque*. Beide staan in de map `fonts/` (vrij te gebruiken onder de SIL Open Font License), dus bezoekers maken geen verbinding met Google.
+
 ## Wijzigen
 
 - Vorm, kleuren en pijlen van het schema: `js/schema-data.js`

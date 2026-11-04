@@ -5,16 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Na de basisschool</title>
   <meta name="description" content="Een interactief schema over de wegen na de basisschool en de scholen in de regio.">
+  <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="start">
   <header class="kop">
     <div class="merk">
       <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="2" y="2" width="12" height="12" rx="3" fill="#0f766e"/>
-        <rect x="18" y="2" width="12" height="12" rx="3" fill="#c2410c"/>
-        <rect x="2" y="18" width="12" height="12" rx="3" fill="#7c3aed"/>
-        <rect x="18" y="18" width="12" height="12" rx="3" fill="#1d4ed8"/>
+        <rect x="2" y="2" width="12" height="12" rx="4" fill="oklch(0.6 0.12 185)"/>
+        <rect x="18" y="2" width="12" height="12" rx="4" fill="oklch(0.65 0.16 45)"/>
+        <rect x="2" y="18" width="12" height="12" rx="4" fill="oklch(0.6 0.17 300)"/>
+        <rect x="18" y="18" width="12" height="12" rx="4" fill="oklch(0.6 0.16 262)"/>
       </svg>
       <div>
         <h1>Na de basisschool</h1>
@@ -30,11 +31,7 @@
 
       <div class="info-wrap">
         <button type="button" id="info-knop" class="info-knop" aria-label="Uitleg" aria-expanded="false" aria-controls="info">
-          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-            <circle cx="12" cy="7.6" r="1.4" fill="currentColor"/>
-            <path d="M12 11v6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-          </svg>
+          i
         </button>
         <div id="info" class="info-kaart" role="dialog" aria-label="Uitleg" hidden>
           <h2>Klik op een blok</h2>
@@ -49,6 +46,7 @@
       </div>
     </div>
   </header>
+  <div class="kleurstreep" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
 
   <div class="canvas">
     <main class="kaart">

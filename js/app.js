@@ -5,7 +5,7 @@ import { h, svg, veiligeUrl } from './dom.js';
 import {
   BLOKKEN, VMBO, MBO, LEERWEGEN, MBO_NIVEAUS, PIJLEN, GROEPEN,
   JAAR_PX, GROND_Y, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, MET_SCHOLEN, brugklasDelen, SCHOOL_NIVEAU_VOLGORDE,
-  leerwegGeometrie, mboGeometrie, hoekVan, SCHEMA_VIEWBOX,
+  leerwegGeometrie, mboGeometrie, hoekVan, SCHEMA_VIEWBOX, paletStijl, paletVan,
 } from './schema-data.js';
 
 const schemaEl = document.querySelector('#schema');
@@ -106,20 +106,28 @@ const omschrijving = (id) => staat.omschrijvingen[id] || STANDAARD_OMSCHRIJVING[
 
 function tekenTekst(regels, cx) {
   return regels.map(([tekst, y, grootte, vet]) =>
-    svg('text', { x: cx, y, 'font-size': grootte, 'font-weight': vet ? 800 : 600, 'text-anchor': 'middle' }, tekst));
+    svg('text', {
+      x: cx, y, 'font-size': grootte, 'font-weight': vet ? 800 : 400, 'fill-opacity': vet ? 1 : 0.8, 'text-anchor': 'middle',
+    }, tekst));
 }
 
+// Een lichte rand om een blok dat je daarna kunt kiezen; alleen zichtbaar als dat blok 'dichtbij' is.
+const maakRing = (x, y, w, hoogte, r) => svg('rect', {
+  class: 'ring', x: x - 3, y: y - 3, width: w + 6, height: hoogte + 6, rx: r + 3,
+});
+
 function maakBlok(def, extra = []) {
-  const { id, kleur, x, y, w, h: hoogte } = def;
+  const { id, x, y, w, h: hoogte } = def;
   return svg('g', {
-    class: 'blok', 'data-id': id, tabindex: 0, role: 'button', 'aria-pressed': 'false',
-    'aria-label': NIVEAU_INFO[id].naam,
+    class: GROEPEN[id] && id !== 'vwo' ? 'blok container' : 'blok', 'data-id': id, tabindex: 0, role: 'button', 'aria-pressed': 'false',
+    'aria-label': NIVEAU_INFO[id].naam, style: paletStijl(id),
   },
+  maakRing(x, y, w, hoogte, 18),
   def.verlenging && svg('rect', {
     class: 'verlenging', x: x + 2, y: def.verlenging.y + 2, width: w - 4, height: def.verlenging.h + 2,
-    rx: 14, stroke: kleur,
+    rx: 18,
   }),
-  svg('rect', { class: 'vorm', x, y, width: w, height: hoogte, rx: 14, fill: kleur }),
+  svg('rect', { class: 'vorm', x, y, width: w, height: hoogte, rx: 18 }),
   ...tekenTekst(def.tekst, x + w / 2),
   ...extra);
 }
@@ -127,11 +135,14 @@ function maakBlok(def, extra = []) {
 function tekenSchema() {
   schemaEl.setAttribute('viewBox', SCHEMA_VIEWBOX);
   const defs = svg('defs', {},
-    ...[['kop-grijs', '#94a3b8'], ['kop-donker', '#0f172a'], ['kop-route', '#b45309']].map(([id, kleur]) =>
-      svg('marker', {
-        id, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 16, markerHeight: 16,
-        markerUnits: 'userSpaceOnUse', orient: 'auto',
-      }, svg('path', { d: 'M0,0 L10,5 L0,10 z', fill: kleur }))));
+    ...[['kop-grijs', 'oklch(0.68 0.025 265)', 10], ['kop-donker', 'oklch(0.25 0.04 265)', 12], ['kop-route', 'oklch(0.5 0.12 60)', 13]]
+      .map(([id, kleur, grootte]) =>
+        svg('marker', {
+          id, viewBox: '0 0 10 10', refX: 7, refY: 5, markerWidth: grootte, markerHeight: grootte,
+          markerUnits: 'userSpaceOnUse', orient: 'auto',
+        }, svg('path', {
+          d: 'M1 1 L8 5 L1 9', fill: 'none', stroke: kleur, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+        }))));
 
   // Tijdlijn aan de zijkant: elk jaar een streepje, met stippellijnen door het schema.
   const tijdlijn = svg('g', { class: 'tijdlijn', 'aria-hidden': 'true' },
@@ -145,7 +156,7 @@ function tekenSchema() {
       ];
     }),
     svg('text', { class: 'titel', transform: `translate(16 ${GROND_Y - 3 * JAAR_PX}) rotate(-90)`, 'text-anchor': 'middle' },
-      'Leertijd in jaren'));
+      'LEERTIJD IN JAREN'));
 
   const pijlen = svg('g', { class: 'pijlen', 'aria-hidden': 'true' },
     ...PIJLEN.map((p, i) => svg('path', { class: 'pijl', 'data-van': p.van, 'data-naar': p.naar, 'data-index': i, d: p.d })));
@@ -155,12 +166,15 @@ function tekenSchema() {
     const g = leerwegGeometrie(i);
     return svg('g', {
       class: 'blok cel', 'data-id': lw.id, tabindex: 0, role: 'button', 'aria-pressed': 'false',
-      'aria-label': NIVEAU_INFO[lw.id].naam,
+      'aria-label': NIVEAU_INFO[lw.id].naam, style: paletStijl(lw.id),
     },
-    svg('rect', { class: 'vorm', x: g.x, y: g.y, width: g.w, height: g.h, rx: 10 }),
+    maakRing(g.x, g.y, g.w, g.h, 12),
+    svg('rect', { class: 'vorm', x: g.x, y: g.y, width: g.w, height: g.h, rx: 12 }),
     svg('text', { x: g.x + g.w / 2, y: g.y + 34, 'font-size': 26, 'font-weight': 800, 'text-anchor': 'middle' }, lw.kort),
     ...lw.regels.map((regel, r) =>
-      svg('text', { x: g.x + g.w / 2, y: g.y + 66 + r * 19, 'font-size': 14, 'font-weight': 600, 'text-anchor': 'middle' }, regel)));
+      svg('text', {
+        x: g.x + g.w / 2, y: g.y + 66 + r * 19, 'font-size': 14, 'font-weight': 400, 'fill-opacity': 0.85, 'text-anchor': 'middle',
+      }, regel)));
   });
   const vmbo = maakBlok(VMBO, leerwegen);
 
@@ -169,11 +183,14 @@ function tekenSchema() {
     const g = mboGeometrie(i);
     return svg('g', {
       class: 'blok cel', 'data-id': n.id, tabindex: 0, role: 'button', 'aria-pressed': 'false',
-      'aria-label': NIVEAU_INFO[n.id].naam,
+      'aria-label': NIVEAU_INFO[n.id].naam, style: paletStijl(n.id),
     },
-    svg('rect', { class: 'vorm', x: g.x, y: g.y, width: g.w, height: g.h, rx: 10 }),
+    maakRing(g.x, g.y, g.w, g.h, 12),
+    svg('rect', { class: 'vorm', x: g.x, y: g.y, width: g.w, height: g.h, rx: 12 }),
     svg('text', { x: g.x + g.w / 2, y: g.y + 38, 'font-size': 18, 'font-weight': 800, 'text-anchor': 'middle' }, `niveau ${n.nummer}`),
-    svg('text', { x: g.x + g.w / 2, y: g.y + 62, 'font-size': 14, 'font-weight': 600, 'text-anchor': 'middle' }, n.duur));
+    svg('text', {
+      x: g.x + g.w / 2, y: g.y + 62, 'font-size': 14, 'font-weight': 400, 'fill-opacity': 0.8, 'text-anchor': 'middle',
+    }, n.duur));
   });
   const mbo = maakBlok(MBO, mboNiveaus);
 
@@ -197,14 +214,41 @@ function kies(id) {
   tekenPaneel();
 }
 
+// Welke blokken horen bij de keuze? 'aan' = het gekozen blok, 'dichtbij' = waar je daarna naartoe kunt,
+// 'uit' = de rest (die wordt gedimd). Het vmbo en het mbo bevatten blokjes: die blijven gewoon zichtbaar.
+const CONTAINERS = { vmbo: GROEPEN.vmbo, mbo: GROEPEN.mbo };
+const OUDER = Object.fromEntries(Object.entries(CONTAINERS).flatMap(([ouder, kinderen]) => kinderen.map((k) => [k, ouder])));
+
+function bepaalStand(id) {
+  if (!id) return () => 'rust';
+  const dichtbij = new Set(CONTAINERS[id] || []);
+  for (const p of pijlenVan(id)) {
+    dichtbij.add(p.van);
+    dichtbij.add(p.naar);
+  }
+  return (bid) => {
+    if (bid === id) return 'aan';
+    if (dichtbij.has(bid)) return 'dichtbij';
+    if ((CONTAINERS[bid] || []).some((kind) => kind === id || dichtbij.has(kind))) return 'rust';
+    if (OUDER[bid] === id) return 'rust';
+    return 'uit';
+  };
+}
+
 function werkSchemaBij() {
   const id = staat.gekozen;
   const actiefeBlokken = new Set(id ? [id] : []);
   schemaEl.classList.toggle('heeft-keuze', Boolean(id));
 
+  // Bij een gekozen route krijgt de route de aandacht (zie tekenRoute), anders de gekozen kaart.
+  const stand = huidigeRoute() ? bepaalStand(null) : bepaalStand(id);
+
   schemaEl.querySelectorAll('.blok').forEach((blok) => {
     const actief = actiefeBlokken.has(blok.dataset.id);
+    const s = stand(blok.dataset.id);
     blok.classList.toggle('actief', actief);
+    blok.classList.toggle('dichtbij', s === 'dichtbij');
+    blok.classList.toggle('uit', s === 'uit');
     blok.setAttribute('aria-pressed', String(actief));
   });
 
@@ -248,19 +292,27 @@ function tekenRoute() {
 
 // ---------- Paneel bovenin ----------
 
+// Knop naar een ander onderdeel: wit met een gekleurd vierkantje ervoor.
+const kiesKnop = (doel) => h('button', {
+  type: 'button', class: 'chip', onclick: () => kies(doel),
+}, h('span', { class: 'stip', style: `background: ${NIVEAU_INFO[doel].kleur}` }), NIVEAU_INFO[doel].kort);
+
 function tekenInfo(id) {
   const info = NIVEAU_INFO[id];
+  const palet = paletVan(id);
   const doelen = hierna(id);
-  return h('div', { class: 'info', style: `--kleur: ${info.kleur}` },
+  return h('div', { class: 'info', style: `--solid: ${palet.solid}; --tint: ${palet.tint}; --ink: ${palet.ink}` },
     h('div', { class: 'kop-rij' },
-      h('h2', {}, info.naam, info.duur && h('span', { class: 'duur' }, info.duur)),
+      h('div', { class: 'info-kop' },
+        h('span', { class: 'kleurbalk' }),
+        h('h2', {}, info.titel || info.naam),
+        info.sub && h('p', { class: 'sub' }, info.sub)),
       h('button', { type: 'button', class: 'sluit', 'aria-label': `Sluit ${info.kort}`, onclick: () => kies(id) }, '×')),
-    h('p', {}, omschrijving(id)),
+    info.duur && h('p', { class: 'duur-rij' }, h('span', { class: 'duur-pil' }, `Duur: ${info.duur}`)),
+    h('p', { class: 'uitleg' }, omschrijving(id)),
     doelen.length > 0 && h('div', { class: 'hierna' },
-      h('span', { class: 'hierna-label' }, 'Hierna kun je naar:'),
-      ...doelen.map((doel) =>
-        h('button', { type: 'button', class: 'chip', style: `--kleur: ${NIVEAU_INFO[doel].kleur}`, onclick: () => kies(doel) },
-          NIVEAU_INFO[doel].kort))));
+      h('div', { class: 'label' }, 'Daarna kun je naar'),
+      h('div', { class: 'chips' }, ...doelen.map(kiesKnop))));
 }
 
 function tekenScholen(id) {
@@ -396,11 +448,12 @@ function tekenBeroep(beroep) {
   });
 
   return h('div', { class: 'beroep' },
+    h('div', { class: 'label' }, 'Beroep'),
     h('h2', {}, beroep.naam),
-    beroep.omschrijving && h('p', {}, beroep.omschrijving),
+    beroep.omschrijving && h('p', { class: 'uitleg' }, beroep.omschrijving),
     routes.length === 0
       ? h('p', { class: 'leeg' }, 'Voor dit beroep zijn nog geen routes ingevoerd.')
-      : h('p', { class: 'hierna-label' },
+      : h('p', { class: 'route-uitleg' },
         routes.length > 1 ? 'Er zijn meerdere wegen na de basisschool. Kies een route of klik op een stap:' : 'Zo kom je er na de basisschool:'),
     h('ul', { class: 'routes' }, ...routes));
 }
