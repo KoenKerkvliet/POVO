@@ -420,11 +420,38 @@ function kiesStap(routeIndex, id) {
   tekenPaneel();
 }
 
+// In de keuzelijst staat elk beroep onder het laagste niveau waarmee je het kunt bereiken.
+const BEROEP_GROEPEN = [
+  { label: 'Praktijkonderwijs', ids: ['pro', 'werk'] },
+  { label: 'Mbo niveau 1', ids: ['mbo1'] },
+  { label: 'Mbo niveau 2', ids: ['mbo2'] },
+  { label: 'Mbo niveau 3', ids: ['mbo3'] },
+  { label: 'Mbo niveau 4', ids: ['mbo4'] },
+  { label: 'Hbo', ids: ['hbo'] },
+  { label: 'Wo (universiteit)', ids: ['wo'] },
+];
+
+function beroepGroep(beroep) {
+  const nummers = beroep.routes
+    .map((route) => BEROEP_GROEPEN.findIndex((g) => g.ids.includes(route.stappen[route.stappen.length - 1])))
+    .filter((n) => n >= 0);
+  return nummers.length ? Math.min(...nummers) : BEROEP_GROEPEN.length;
+}
+
 function vulBeroepKeuze() {
   beroepKeuzeEl.hidden = staat.beroepen.length === 0;
-  beroepSelectEl.replaceChildren(
-    h('option', { value: '' }, 'Kies een beroep...'),
-    ...staat.beroepen.map((b) => h('option', { value: b.id }, b.naam)));
+
+  const perGroep = new Map();
+  for (const beroep of staat.beroepen) {
+    const nummer = beroepGroep(beroep);
+    if (!perGroep.has(nummer)) perGroep.set(nummer, []);
+    perGroep.get(nummer).push(beroep);
+  }
+  const groepen = [...perGroep.entries()].sort((x, y) => x[0] - y[0]).map(([nummer, beroepen]) =>
+    h('optgroup', { label: BEROEP_GROEPEN[nummer]?.label || 'Overig' },
+      ...beroepen.sort((x, y) => x.naam.localeCompare(y.naam, 'nl')).map((b) => h('option', { value: b.id }, b.naam))));
+
+  beroepSelectEl.replaceChildren(h('option', { value: '' }, 'Kies een beroep...'), ...groepen);
   beroepSelectEl.value = staat.beroep || '';
 }
 

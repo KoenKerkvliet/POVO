@@ -24,6 +24,10 @@ Zolang de sleutel leeg is, laat de website voorbeeldscholen en voorbeeldberoepen
 2. In het dashboard, tab *Beroepen*, maak je beroepen aan. Per beroep stel je een of meer routes samen: kies na de basisschool de eerste stap, en daarna steeds de volgende. Je kunt alleen stappen kiezen waar in het schema een pijl naartoe loopt.
 3. Op de website verschijnt in de kop een keuzelijst *Beroep*. Kinderen zien dan de routes en in het schema de genummerde stappen. Klikken op een stap toont de uitleg en de scholen.
 
+### Startlijst met beroepen
+
+`supabase/stap3-beroepen-startlijst.sql` zet 37 beroepen met routes klaar: 5 bij het praktijkonderwijs, 3 bij mbo niveau 1, 5 bij niveau 2, 5 bij niveau 3, 5 bij niveau 4, 7 bij het hbo en 7 bij het wo. Voer het uit na `stap2-beroepen.sql`. Een beroep dat al bestaat (op naam) wordt overgeslagen, dus je eigen aanpassingen blijven staan. In de keuzelijst staat elk beroep onder het laagste niveau waarmee je het kunt bereiken.
+
 ## Lokaal bekijken
 
 De pagina's gebruiken ES-modules en werken dus niet door ze te dubbelklikken. Start in deze map:
