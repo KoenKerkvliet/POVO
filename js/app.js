@@ -56,6 +56,27 @@ function zetScholenSectieOpen(open) {
   }
 }
 
+// Of de sectie met beroepen bij een Werk-vakje uitgeklapt is (standaard dicht).
+const WERK_SLEUTEL = 'povo-werk-beroepen-open';
+
+function laadWerkSectieOpen() {
+  try {
+    return localStorage.getItem(WERK_SLEUTEL) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function zetWerkSectieOpen(open) {
+  if (open === staat.werkOpen) return;
+  staat.werkOpen = open;
+  try {
+    localStorage.setItem(WERK_SLEUTEL, open ? '1' : '0');
+  } catch {
+    // opslag niet beschikbaar: de stand geldt dan alleen tot je de pagina ververst
+  }
+}
+
 function zetSchoolOpen(id, open) {
   if (open === staat.openScholen.has(id)) return;
   if (open) staat.openScholen.add(id);
@@ -65,7 +86,7 @@ function zetSchoolOpen(id, open) {
 
 const staat = {
   gekozen: null, plaats: null, scholen: [], omschrijvingen: {}, demo: false,
-  beroepen: [], beroep: null, route: 0, alleenTweetalig: false, openScholen: laadOpenScholen(), scholenOpen: laadScholenSectieOpen(),
+  beroepen: [], beroep: null, route: 0, alleenTweetalig: false, openScholen: laadOpenScholen(), scholenOpen: laadScholenSectieOpen(), werkOpen: laadWerkSectieOpen(),
 };
 
 // ---------- Hulpfuncties ----------
@@ -485,6 +506,56 @@ function tekenBeroep(beroep) {
     h('ul', { class: 'routes' }, ...routes));
 }
 
+// Welke beroepen horen bij een Werk-vakje: die je kunt bereiken via een route die op dat niveau eindigt.
+const WERK_NA = {
+  werk: { titel: 'Beroepen na het praktijkonderwijs', niveaus: ['werk'] },
+  'werk-mbo': { titel: 'Beroepen na het mbo', niveaus: ['mbo1', 'mbo2', 'mbo3', 'mbo4'] },
+  'werk-hbo': { titel: 'Beroepen na het hbo', niveaus: ['hbo'] },
+  'werk-wo': { titel: 'Beroepen na de universiteit', niveaus: ['wo'] },
+};
+
+function tekenWerkBeroepen(id) {
+  const na = WERK_NA[id];
+  if (!na || staat.beroepen.length === 0) return null;
+
+  // Per beroep: het laagste niveau (van dit Werk-vakje) waarop een route eindigt.
+  const passend = staat.beroepen
+    .map((b) => {
+      const plekken = b.routes.map((r) => na.niveaus.indexOf(r.stappen[r.stappen.length - 1])).filter((n) => n >= 0);
+      return plekken.length ? { beroep: b, plek: Math.min(...plekken) } : null;
+    })
+    .filter(Boolean)
+    .sort((x, y) => x.plek - y.plek || x.beroep.naam.localeCompare(y.beroep.naam, 'nl'));
+
+  const knop = (b) => h('button', {
+    type: 'button', class: 'chip', 'aria-pressed': String(staat.beroep === b.id), onclick: () => kiesBeroep(b.id),
+  }, h('span', { class: 'stip', style: 'background: var(--amber)' }), b.naam);
+
+  // Bij het mbo staan de beroepen onder hun niveau; bij de andere vakjes is er één lijst.
+  const metNiveaus = na.niveaus.length > 1;
+  const inhoud = passend.length === 0
+    ? [h('p', { class: 'leeg' }, 'Hier zijn nog geen beroepen voor ingevoerd.')]
+    : metNiveaus
+      ? na.niveaus.flatMap((niveau, i) => {
+        const hier = passend.filter((p) => p.plek === i);
+        return hier.length === 0 ? [] : [
+          h('h4', { class: 'sectie-titel' }, NIVEAU_INFO[niveau].naam),
+          h('div', { class: 'chips beroep-chips' }, ...hier.map((p) => knop(p.beroep))),
+        ];
+      })
+      : [h('div', { class: 'chips beroep-chips' }, ...passend.map((p) => knop(p.beroep)))];
+
+  return h('div', { class: 'scholen' },
+    h('details', {
+      class: 'scholen-sectie',
+      open: staat.werkOpen,
+      ontoggle: (e) => zetWerkSectieOpen(e.target.open),
+    },
+    h('summary', {}, h('h3', {}, na.titel), h('span', { class: 'aantal' }, String(passend.length))),
+    h('p', { class: 'werk-hint' }, 'Kies een beroep om de route ernaartoe te zien.'),
+    ...inhoud));
+}
+
 function tekenPaneel() {
   const id = staat.gekozen;
   const beroep = huidigBeroep();
@@ -494,6 +565,8 @@ function tekenPaneel() {
   if (id) {
     delen.push(tekenInfo(id));
     if (MET_SCHOLEN.includes(id)) delen.push(tekenScholen(id));
+    const werkBeroepen = tekenWerkBeroepen(id);
+    if (werkBeroepen) delen.push(werkBeroepen);
   }
   if (delen.length === 0) {
     delen.push(h('div', { class: 'leeg-paneel' },

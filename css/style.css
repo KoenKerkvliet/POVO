@@ -386,6 +386,11 @@ body.start {
 .school .meer summary { cursor: pointer; font-weight: 600; color: var(--tekst); }
 .school .meer-tekst { margin: 4px 0 0 !important; white-space: pre-line; color: var(--tekst-zacht); }
 
+.werk-hint { margin: 0 0 12px !important; font-size: 15px; color: var(--tekst-zacht); }
+.beroep-chips { margin-bottom: 14px; }
+.beroep-chips .chip[aria-pressed="true"] { border-color: var(--amber); background: oklch(0.97 0.03 80); }
+.scholen .sectie-titel { margin-top: 4px; }
+
 .leeg, .demo, .fout { color: var(--tekst-zacht); font-size: .9rem; }
 .demo {
   margin: 0;
