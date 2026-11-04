@@ -6,8 +6,9 @@
 --
 -- Praktijkonderwijs: vakkenvuller, schoonmaker, magazijnmedewerker, keukenhulp, medewerker groenvoorziening
 -- Mbo niveau 1:      winkelassistent, bouwassistent, assistent in de zorg
--- Mbo niveau 2:      kapper, timmerman, kok, helpende in de zorg, verkoper
--- Mbo niveau 3:      pedagogisch medewerker, verzorgende, dierverzorger, elektricien, financieel-administratief medewerker
+-- Mbo niveau 2:      kapper, timmerman, kok, helpende in de zorg, verkoper, automonteur
+-- Mbo niveau 3:      pedagogisch medewerker, verzorgende, dierverzorger, elektricien, financieel-administratief medewerker,
+-- schoonheidsspecialist, nagelstylist
 -- Mbo niveau 4:      verpleegkundige, doktersassistent, politieagent, software developer, onderwijsassistent
 -- Hbo:               leraar basisonderwijs, fysiotherapeut, maatschappelijk werker, docent, ergotherapeut, journalist, bouwkundig ingenieur
 -- Wo:                dierenarts, advocaat, psycholoog, apotheker, tandarts, rechter, wetenschappelijk onderzoeker
@@ -33,11 +34,14 @@ begin
     ('Kok', 'Een kok maakt gerechten in een restaurant, hotel of zorginstelling. Je leert koken, netjes werken en samenwerken in een keuken.', array['vmbo-bbl,mbo2', 'pro,mbo1,mbo2', 'vmbo-kbl,mbo3']),
     ('Helpende in de zorg', 'Een helpende ondersteunt mensen bij dagelijkse dingen, zoals wassen, aankleden en eten. Je werkt in een zorginstelling of bij mensen thuis.', array['vmbo-bbl,mbo2', 'pro,mbo1,mbo2']),
     ('Verkoper', 'Een verkoper helpt klanten in een winkel, vertelt over producten en rekent af.', array['vmbo-bbl,mbo2', 'pro,mbo1,mbo2']),
+    ('Automonteur', 'Een automonteur onderhoudt en repareert de auto van klanten. Je zoekt uit wat er kapot is, vervangt onderdelen en controleert of de auto veilig is.', array['vmbo-bbl,mbo2', 'pro,mbo1,mbo2', 'vmbo-kbl,mbo3', 'vmbo-gl,mbo3', 'vmbo-bbl,mbo2,mbo3', 'vmbo-tl,mbo4']),
     ('Pedagogisch medewerker kinderopvang', 'Je zorgt voor kinderen op de kinderopvang of de buitenschoolse opvang. Je speelt, leest voor en begeleidt de kinderen.', array['vmbo-kbl,mbo3', 'vmbo-gl,mbo3', 'vmbo-bbl,mbo2,mbo3']),
     ('Verzorgende', 'Een verzorgende helpt mensen die zorg nodig hebben, bijvoorbeeld ouderen. Je helpt bij wassen en aankleden en doet ook medische handelingen, zoals medicijnen geven. Je werkt in een verpleeghuis, de thuiszorg of een ziekenhuis.', array['vmbo-kbl,mbo3', 'vmbo-gl,mbo3', 'vmbo-bbl,mbo2,mbo3']),
     ('Dierverzorger', 'Een dierverzorger zorgt voor dieren, bijvoorbeeld in een dierenasiel, dierentuin of dierenwinkel. Je geeft eten, houdt de verblijven schoon en let op hoe het met de dieren gaat.', array['vmbo-kbl,mbo3', 'vmbo-gl,mbo3', 'vmbo-bbl,mbo2,mbo3']),
     ('Elektricien', 'Een elektricien legt kabels, stopcontacten en lampen aan en repareert storingen. Je werkt in huizen, scholen en bedrijven.', array['vmbo-kbl,mbo3', 'vmbo-gl,mbo3', 'vmbo-bbl,mbo2,mbo3']),
     ('Financieel-administratief medewerker', 'Je houdt de administratie van een bedrijf bij. Je maakt facturen, boekt betalingen en houdt de cijfers bij.', array['vmbo-kbl,mbo3', 'vmbo-gl,mbo3', 'vmbo-bbl,mbo2,mbo3']),
+    ('Schoonheidsspecialist', 'Een schoonheidsspecialist verzorgt de huid van klanten, bijvoorbeeld met gezichtsbehandelingen en make-up. Op het mbo leer je het vak op niveau 3. Daarna kun je je op niveau 4 verder specialiseren.', array['vmbo-kbl,mbo3', 'vmbo-gl,mbo3', 'vmbo-bbl,mbo2,mbo3', 'vmbo-kbl,mbo4', 'vmbo-gl,mbo4', 'vmbo-tl,mbo4', 'havo,mbo4']),
+    ('Nagelstylist', 'Een nagelstylist verzorgt en versiert de nagels van klanten, bijvoorbeeld met gelnagels en nagellak. Er is geen vaste mbo-opleiding voor. Je kunt een cursus volgen, of nagelstyling kiezen als extra onderdeel bij een mbo-opleiding zoals schoonheidsspecialist.', array['vmbo-kbl,mbo3', 'vmbo-gl,mbo3', 'vmbo-bbl,mbo2,mbo3']),
     ('Verpleegkundige', 'Een verpleegkundige verzorgt zieke mensen in een ziekenhuis, een verpleeghuis of bij mensen thuis. Je kunt dit worden via het mbo (niveau 4) of via het hbo.', array['vmbo-gl,mbo4', 'vmbo-tl,mbo4', 'havo,mbo4', 'vmbo-tl,mbo4,hbo', 'havo,hbo', 'vwo,hbo']),
     ('Doktersassistent', 'Een doktersassistent werkt bij de huisarts. Je ontvangt patiënten, doet kleine onderzoeken en helpt de dokter.', array['vmbo-gl,mbo4', 'vmbo-tl,mbo4', 'havo,mbo4']),
     ('Politieagent', 'Een politieagent zorgt voor veiligheid en helpt mensen die in problemen zitten. Je moet minstens 18 jaar zijn om met de opleiding te beginnen.', array['vmbo-gl,mbo4', 'vmbo-tl,mbo4', 'havo,mbo4']),

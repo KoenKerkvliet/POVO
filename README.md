@@ -26,7 +26,7 @@ Zolang de sleutel leeg is, laat de website voorbeeldscholen en voorbeeldberoepen
 
 ### Startlijst met beroepen
 
-`supabase/stap3-beroepen-startlijst.sql` zet 37 beroepen met routes klaar: 5 bij het praktijkonderwijs, 3 bij mbo niveau 1, 5 bij niveau 2, 5 bij niveau 3, 5 bij niveau 4, 7 bij het hbo en 7 bij het wo. Voer het uit na `stap2-beroepen.sql`. Een beroep dat al bestaat (op naam) wordt overgeslagen, dus je eigen aanpassingen blijven staan. In de keuzelijst staat elk beroep onder het laagste niveau waarmee je het kunt bereiken.
+`supabase/stap3-beroepen-startlijst.sql` zet 40 beroepen met routes klaar: 5 bij het praktijkonderwijs, 3 bij mbo niveau 1, 6 bij niveau 2, 7 bij niveau 3, 5 bij niveau 4, 7 bij het hbo en 7 bij het wo. Je kunt het bestand later opnieuw uitvoeren; er worden dan alleen beroepen toegevoegd die nog niet bestaan. Voer het uit na `stap2-beroepen.sql`. Een beroep dat al bestaat (op naam) wordt overgeslagen, dus je eigen aanpassingen blijven staan. In de keuzelijst staat elk beroep onder het laagste niveau waarmee je het kunt bereiken.
 
 ## Lokaal bekijken
 
