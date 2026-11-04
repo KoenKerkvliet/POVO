@@ -102,8 +102,8 @@ export const BLOKKEN = [
     tekst: [['havo', jaarY(5) + 46, 30, true], ['5 jaar', jaarY(5) + 74, 16, false]] },
   { id: 'vwo', kleur: KLEUREN.vwo, x: 1050, y: jaarY(6), w: 150, h: 6 * JAAR_PX,
     tekst: [['vwo', jaarY(6) + 46, 30, true], ['6 jaar', jaarY(6) + 74, 16, false]] },
-  { id: 'werk', kleur: KLEUREN.werk, x: 90, y: RIJ_Y, w: 140, h: RIJ_H,
-    tekst: [['Werk', RIJ_Y + RIJ_H / 2 + 9, 28, true]] },
+  { id: 'werk', kleur: KLEUREN.werk, x: 90, y: WERK_RIJ_Y, w: 140, h: WERK_RIJ_H,
+    tekst: [['Werk', WERK_RIJ_Y + WERK_RIJ_H / 2 + 8, 24, true]] },
   ...[['werk-mbo', 270, 520], ['werk-hbo', 846, 150], ['werk-wo', 1050, 150]].map(([id, x, w]) => ({
     id, kleur: KLEUREN.werk, x, y: WERK_RIJ_Y, w, h: WERK_RIJ_H,
     tekst: [['Werk', WERK_RIJ_Y + WERK_RIJ_H / 2 + 8, 24, true]],
@@ -135,6 +135,7 @@ export function mboGeometrie(i) {
 const KOP = 6; // afstand tussen een blok en het begin of de punt van een pijl
 const rijOnder = RIJ_Y + RIJ_H + KOP; // onderkant van werk, hbo en wo (+ ruimte)
 const mboOnder = RIJ_Y + MBO_H + KOP;
+const werkOnder = WERK_RIJ_Y + WERK_RIJ_H + KOP; // onderkant van de bovenste rij met werk-vakjes
 const mboMidden = RIJ_Y + 112; // hoogte waarop pijlen de zijkant van de mbo-balk raken
 const lijnY = RIJ_Y + 50; // vaste hoogte van de pijlen tussen mbo, hbo en wo
 
@@ -156,7 +157,7 @@ const werkPijl = (x) => `M ${x} ${RIJ_Y - KOP} L ${x} ${WERK_RIJ_Y + WERK_RIJ_H 
 
 // van = blok waar de pijl uit komt, naar = blok waar je terechtkomt.
 export const PIJLEN = [
-  { van: 'pro', naar: 'werk', d: `M 160 ${jaarY(6) - KOP} L 160 ${rijOnder}` },
+  { van: 'pro', naar: 'werk', d: `M 160 ${jaarY(6) - KOP} L 160 ${werkOnder}` },
   { van: 'pro', naar: 'mbo1', d: `M 205 ${jaarY(6) - KOP} C 205 ${mboMidden}, 225 ${mboMidden}, 262 ${mboMidden}` },
 
   { van: 'vmbo-bbl', naar: 'mbo2', d: omhoog(335, 465) },
