@@ -183,6 +183,17 @@ body.start {
 
 .info { display: flex; flex-direction: column; gap: 18px; }
 .info-kop { display: flex; flex-direction: column; gap: 10px; }
+/* afbeelding bovenin het infopaneel: leerlingen op een zachte vlakte in de kleur van het niveau */
+.info-beeld {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 170px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--tint);
+}
+.info-beeld img { height: 100%; width: auto; max-width: 100%; object-fit: contain; object-position: bottom; }
 .kleurbalk { display: block; width: 44px; height: 8px; border-radius: 4px; background: var(--solid); }
 .sub { margin: 0 !important; font-size: 16px; color: var(--tekst-zacht); }
 .duur-rij { margin: 0 !important; display: flex; }
@@ -404,7 +415,8 @@ body.start {
 /* ---------- Beroep en routes ---------- */
 
 .beroep { display: flex; flex-direction: column; gap: 12px; }
-.beroep h2 { margin-top: -6px; }
+.beroep-kop { display: flex; flex-direction: column; gap: 8px; }
+.beroep h2 { margin: 0; }
 .route-uitleg { margin: 0 !important; font-size: 15px; color: var(--tekst-zacht); }
 .routes { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 
@@ -501,6 +513,8 @@ body.start {
 
 #schema text { pointer-events: none; }
 #schema .afbeelding { pointer-events: none; }
+/* een leerling onder een vmbo-blokje hoort bij dat blokje: klikken kiest die leerweg */
+#schema .cel .afbeelding { pointer-events: auto; }
 
 /* tijdlijn */
 #schema .as, #schema .streep { stroke: oklch(0.8 0.015 85); stroke-width: 1.5; }

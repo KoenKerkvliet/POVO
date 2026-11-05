@@ -5,7 +5,7 @@ import { h, svg, veiligeUrl } from './dom.js';
 import {
   BLOKKEN, VMBO, MBO, LEERWEGEN, MBO_NIVEAUS, PIJLEN, GROEPEN,
   JAAR_PX, GROND_Y, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, MET_SCHOLEN, brugklasDelen, SCHOOL_NIVEAU_VOLGORDE,
-  leerwegGeometrie, mboGeometrie, hoekVan, SCHEMA_VIEWBOX, paletStijl, paletVan,
+  leerwegGeometrie, mboGeometrie, hoekVan, SCHEMA_VIEWBOX, paletStijl, paletVan, leerwegBeeld, AFBEELDINGEN, paneelAfbeelding,
 } from './schema-data.js';
 
 const schemaEl = document.querySelector('#schema');
@@ -212,6 +212,7 @@ function tekenSchema() {
   // vmbo met vier leerwegen
   const leerwegen = LEERWEGEN.map((lw, i) => {
     const g = leerwegGeometrie(i);
+    const beeld = leerwegBeeld(i);
     return svg('g', {
       class: 'blok cel', 'data-id': lw.id, tabindex: 0, role: 'button', 'aria-pressed': 'false',
       'aria-label': NIVEAU_INFO[lw.id].naam, style: paletStijl(lw.id),
@@ -222,7 +223,11 @@ function tekenSchema() {
     ...lw.regels.map((regel, r) =>
       svg('text', {
         x: g.x + g.w / 2, y: g.y + 66 + r * 19, 'font-size': 14, 'font-weight': 400, 'fill-opacity': 0.85, 'text-anchor': 'middle',
-      }, regel)));
+      }, regel)),
+    svg('g', { class: 'afbeelding', 'aria-hidden': 'true' },
+      svg('image', {
+        href: AFBEELDINGEN[lw.id], x: beeld.x, y: beeld.y, width: beeld.w, height: beeld.h, preserveAspectRatio: 'xMidYMax meet',
+      })));
   });
   const vmbo = maakBlok(VMBO, leerwegen);
 
@@ -349,7 +354,9 @@ function tekenInfo(id) {
   const info = NIVEAU_INFO[id];
   const palet = paletVan(id);
   const doelen = hierna(id);
+  const beeld = paneelAfbeelding(id);
   return h('div', { class: 'info', style: `--solid: ${palet.solid}; --tint: ${palet.tint}; --ink: ${palet.ink}` },
+    beeld && h('div', { class: 'info-beeld' }, h('img', { src: beeld, alt: '', loading: 'lazy' })),
     h('div', { class: 'kop-rij' },
       h('div', { class: 'info-kop' },
         h('span', { class: 'kleurbalk' }),
@@ -524,9 +531,13 @@ function tekenBeroep(beroep) {
   });
 
   return h('div', { class: 'beroep', style: paletStijl('werk') },
-    h('span', { class: 'kleurbalk' }),
-    h('div', { class: 'label' }, 'Beroep'),
-    h('h2', {}, beroep.naam),
+    h('div', { class: 'kop-rij' },
+      h('div', { class: 'beroep-kop' },
+        h('span', { class: 'kleurbalk' }),
+        h('div', { class: 'label' }, 'Beroep'),
+        h('h2', {}, beroep.naam)),
+      // Kruisje: het beroep deselecteren zonder de keuzelijst te gebruiken.
+      h('button', { type: 'button', class: 'sluit', 'aria-label': `Sluit ${beroep.naam}`, onclick: () => kiesBeroep(null) }, '×')),
     beroep.omschrijving && h('p', { class: 'uitleg' }, beroep.omschrijving),
     routes.length === 0
       ? h('p', { class: 'leeg' }, 'Voor dit beroep zijn nog geen routes ingevoerd.')

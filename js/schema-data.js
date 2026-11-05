@@ -100,8 +100,10 @@ export const BLOKKEN = [
     verlenging: { y: jaarY(6), h: JAAR_PX }, // gestippeld stuk: sommige leerlingen doen er een jaar langer over
     tekst: [['praktijk', jaarY(5) + 44, 22, true], ['onderwijs', jaarY(5) + 70, 22, true], ['5/6 jaar', jaarY(5) + 100, 16, false]] },
   { id: 'havo', kleur: KLEUREN.havo, x: 846, y: jaarY(5), w: 150, h: 5 * JAAR_PX,
+    afbeelding: { src: 'img/havo.webp', verhouding: 1.5 },
     tekst: [['havo', jaarY(5) + 46, 30, true], ['5 jaar', jaarY(5) + 74, 16, false]] },
   { id: 'vwo', kleur: KLEUREN.vwo, x: 1050, y: jaarY(6), w: 150, h: 6 * JAAR_PX,
+    afbeelding: { src: 'img/vwo.webp', verhouding: 1.5 },
     tekst: [['vwo', jaarY(6) + 46, 30, true], ['6 jaar', jaarY(6) + 74, 16, false]] },
   { id: 'werk', kleur: KLEUREN.werk, x: 90, y: WERK_RIJ_Y, w: 140, h: WERK_RIJ_H,
     tekst: [['Werk', WERK_RIJ_Y + WERK_RIJ_H / 2 + 8, 24, true]] },
@@ -119,7 +121,7 @@ const LEERWEG_Y = jaarY(4) + 14;
 const LEERWEG_H = 152;
 
 export const VMBO = { id: 'vmbo', kleur: KLEUREN.vmbo, x: VMBO_X, y: jaarY(4), w: 520, h: 4 * JAAR_PX,
-  tekst: [['vmbo', LEERWEG_Y + LEERWEG_H + 56, 30, true], ['4 jaar', LEERWEG_Y + LEERWEG_H + 82, 16, false]] };
+  tekst: [['vmbo', LEERWEG_Y + LEERWEG_H + 34, 30, true], ['4 jaar', LEERWEG_Y + LEERWEG_H + 60, 16, false]] };
 
 export const MBO = { id: 'mbo', kleur: KLEUREN.mbo, x: VMBO_X, y: RIJ_Y, w: 520, h: MBO_H,
   tekst: [['mbo', RIJ_Y + 30, 22, true]] };
@@ -127,6 +129,14 @@ export const MBO = { id: 'mbo', kleur: KLEUREN.mbo, x: VMBO_X, y: RIJ_Y, w: 520,
 export function leerwegGeometrie(i) {
   return { x: VMBO_X + 6 + LEERWEG_B * i, y: LEERWEG_Y, w: LEERWEG_B - 12, h: LEERWEG_H };
 }
+// Plek van de leerling onder een leerweg-blokje, onderaan het vmbo-blok.
+export function leerwegBeeld(i) {
+  const cel = leerwegGeometrie(i);
+  const breedte = 106;
+  const hoogte = breedte * 1.5;
+  return { x: cel.x + (cel.w - breedte) / 2, y: VMBO.y + VMBO.h - hoogte, w: breedte, h: hoogte };
+}
+
 export function mboGeometrie(i) {
   return { x: VMBO_X + 6 + LEERWEG_B * i, y: RIJ_Y + 44, w: LEERWEG_B - 12, h: 86 };
 }
@@ -190,6 +200,29 @@ export const PIJLEN = [
   { van: 'hbo', naar: 'werk-hbo', d: werkPijl(921) },
   { van: 'wo', naar: 'werk-wo', d: werkPijl(1125) },
 ];
+
+// Afbeeldingen van een leerling per niveau. Single-leerlingen staan in het schema zelf (onderaan de kolom of het vmbo-blok);
+// de afbeeldingen met twee leerlingen (mbo, hbo, wo) passen niet in hun vakje en staan bovenin het infopaneel.
+export const AFBEELDINGEN = {
+  pro: 'img/pro.webp',
+  'vmbo-bbl': 'img/vmbo-bbl.webp',
+  'vmbo-kbl': 'img/vmbo-kbl.webp',
+  'vmbo-gl': 'img/vmbo-gl.webp',
+  'vmbo-tl': 'img/vmbo-tl.webp',
+  havo: 'img/havo.webp',
+  vwo: 'img/vwo.webp',
+  mbo: 'img/mbo.webp',
+  hbo: 'img/hbo.webp',
+  wo: 'img/wo.webp',
+};
+const AFBEELDING_ALIAS = { mbo1: 'mbo', mbo2: 'mbo', mbo3: 'mbo', mbo4: 'mbo' };
+const AFBEELDING_IN_SCHEMA = new Set(['pro', 'vmbo-bbl', 'vmbo-kbl', 'vmbo-gl', 'vmbo-tl', 'havo', 'vwo']);
+
+// De afbeelding die in het infopaneel hoort (alleen als hij niet al in het schema staat).
+export function paneelAfbeelding(id) {
+  const sleutel = AFBEELDING_ALIAS[id] || id;
+  return AFBEELDING_IN_SCHEMA.has(sleutel) ? null : AFBEELDINGEN[sleutel] || null;
+}
 
 // Groepen: klik je op het vmbo of de mbo-balk, dan tellen de onderdelen mee.
 export const GROEPEN = {
