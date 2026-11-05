@@ -149,6 +149,20 @@ const maakRing = (x, y, w, hoogte, r) => svg('rect', {
   class: 'ring', x: x - 3, y: y - 3, width: w + 6, height: hoogte + 6, rx: r + 3,
 });
 
+// Een leerling onderaan een kolom, alsof hij of zij daar staat. Wordt bijgesneden op de afgeronde hoeken van het blok.
+function maakAfbeelding(def) {
+  const { id, x, y, w, h: hoogte, afbeelding } = def;
+  const breedte = w - 12;
+  const beeldHoogte = breedte * afbeelding.verhouding;
+  const knip = `knip-${id}`;
+  return svg('g', { class: 'afbeelding', 'aria-hidden': 'true' },
+    svg('clipPath', { id: knip }, svg('rect', { x, y, width: w, height: hoogte, rx: 18 })),
+    svg('image', {
+      href: afbeelding.src, x: x + 6, y: y + hoogte - beeldHoogte, width: breedte, height: beeldHoogte,
+      preserveAspectRatio: 'xMidYMax meet', 'clip-path': `url(#${knip})`,
+    }));
+}
+
 function maakBlok(def, extra = []) {
   const { id, x, y, w, h: hoogte } = def;
   return svg('g', {
@@ -161,6 +175,7 @@ function maakBlok(def, extra = []) {
     rx: 18,
   }),
   svg('rect', { class: 'vorm', x, y, width: w, height: hoogte, rx: 18 }),
+  def.afbeelding && maakAfbeelding(def),
   ...tekenTekst(def.tekst, x + w / 2),
   ...extra);
 }

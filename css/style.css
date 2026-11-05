@@ -500,6 +500,7 @@ body.start {
 }
 
 #schema text { pointer-events: none; }
+#schema .afbeelding { pointer-events: none; }
 
 /* tijdlijn */
 #schema .as, #schema .streep { stroke: oklch(0.8 0.015 85); stroke-width: 1.5; }

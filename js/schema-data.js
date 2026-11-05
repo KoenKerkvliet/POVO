@@ -96,6 +96,7 @@ export const BLOKKEN = [
   { id: 'basisschool', kleur: KLEUREN.basis, x: 90, y: BASIS_Y, w: 1110, h: BASIS_H,
     tekst: [['basisschool', BASIS_Y + 30, 26, true], ['8 jaar', BASIS_Y + 54, 16, false]] },
   { id: 'pro', kleur: KLEUREN.pro, x: 90, y: jaarY(5), w: 140, h: 5 * JAAR_PX,
+    afbeelding: { src: 'img/pro.webp', verhouding: 1.5 }, // staande leerling onderaan de kolom (breedte : hoogte = 2 : 3)
     verlenging: { y: jaarY(6), h: JAAR_PX }, // gestippeld stuk: sommige leerlingen doen er een jaar langer over
     tekst: [['praktijk', jaarY(5) + 44, 22, true], ['onderwijs', jaarY(5) + 70, 22, true], ['5/6 jaar', jaarY(5) + 100, 16, false]] },
   { id: 'havo', kleur: KLEUREN.havo, x: 846, y: jaarY(5), w: 150, h: 5 * JAAR_PX,
