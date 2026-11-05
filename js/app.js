@@ -5,7 +5,7 @@ import { h, svg, veiligeUrl } from './dom.js';
 import {
   BLOKKEN, VMBO, MBO, LEERWEGEN, MBO_NIVEAUS, PIJLEN, GROEPEN,
   JAAR_PX, GROND_Y, NIVEAU_INFO, STANDAARD_OMSCHRIJVING, MET_SCHOLEN, brugklasDelen, SCHOOL_NIVEAU_VOLGORDE,
-  leerwegGeometrie, mboGeometrie, hoekVan, SCHEMA_VIEWBOX, paletStijl, paletVan, leerwegBeeld, AFBEELDINGEN, paneelAfbeelding,
+  leerwegGeometrie, mboGeometrie, hoekVan, SCHEMA_VIEWBOX, paletStijl, paletVan, leerwegBeeld, AFBEELDINGEN, paneelAfbeelding, LEERLING_BREEDTE,
 } from './schema-data.js';
 
 const schemaEl = document.querySelector('#schema');
@@ -152,13 +152,13 @@ const maakRing = (x, y, w, hoogte, r) => svg('rect', {
 // Een leerling onderaan een kolom, alsof hij of zij daar staat. Wordt bijgesneden op de afgeronde hoeken van het blok.
 function maakAfbeelding(def) {
   const { id, x, y, w, h: hoogte, afbeelding } = def;
-  const breedte = w - 12;
+  const breedte = LEERLING_BREEDTE;
   const beeldHoogte = breedte * afbeelding.verhouding;
   const knip = `knip-${id}`;
   return svg('g', { class: 'afbeelding', 'aria-hidden': 'true' },
     svg('clipPath', { id: knip }, svg('rect', { x, y, width: w, height: hoogte, rx: 18 })),
     svg('image', {
-      href: afbeelding.src, x: x + 6, y: y + hoogte - beeldHoogte, width: breedte, height: beeldHoogte,
+      href: afbeelding.src, x: x + (w - breedte) / 2, y: y + hoogte - beeldHoogte, width: breedte, height: beeldHoogte,
       preserveAspectRatio: 'xMidYMax meet', 'clip-path': `url(#${knip})`,
     }));
 }

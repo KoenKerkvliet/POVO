@@ -121,7 +121,7 @@ const LEERWEG_Y = jaarY(4) + 14;
 const LEERWEG_H = 152;
 
 export const VMBO = { id: 'vmbo', kleur: KLEUREN.vmbo, x: VMBO_X, y: jaarY(4), w: 520, h: 4 * JAAR_PX,
-  tekst: [['vmbo', LEERWEG_Y + LEERWEG_H + 34, 30, true], ['4 jaar', LEERWEG_Y + LEERWEG_H + 60, 16, false]] };
+  tekst: [['vmbo', LEERWEG_Y + LEERWEG_H + 30, 30, true], ['4 jaar', LEERWEG_Y + LEERWEG_H + 54, 16, false]] };
 
 export const MBO = { id: 'mbo', kleur: KLEUREN.mbo, x: VMBO_X, y: RIJ_Y, w: 520, h: MBO_H,
   tekst: [['mbo', RIJ_Y + 30, 22, true]] };
@@ -129,10 +129,14 @@ export const MBO = { id: 'mbo', kleur: KLEUREN.mbo, x: VMBO_X, y: RIJ_Y, w: 520,
 export function leerwegGeometrie(i) {
   return { x: VMBO_X + 6 + LEERWEG_B * i, y: LEERWEG_Y, w: LEERWEG_B - 12, h: LEERWEG_H };
 }
+// Alle leerlingen in het schema zijn even groot, zodat er geen verschil in 'groter' of 'kleiner' ontstaat tussen de niveaus.
+// Ze staan allemaal op dezelfde grondlijn (onderkant van hun kolom of van het vmbo-blok).
+export const LEERLING_BREEDTE = 110;
+
 // Plek van de leerling onder een leerweg-blokje, onderaan het vmbo-blok.
 export function leerwegBeeld(i) {
   const cel = leerwegGeometrie(i);
-  const breedte = 106;
+  const breedte = LEERLING_BREEDTE;
   const hoogte = breedte * 1.5;
   return { x: cel.x + (cel.w - breedte) / 2, y: VMBO.y + VMBO.h - hoogte, w: breedte, h: hoogte };
 }
