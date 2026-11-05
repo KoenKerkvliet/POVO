@@ -114,11 +114,23 @@ function scholenVoor(id) {
 
 const huidigBeroep = () => staat.beroepen.find((b) => b.id === staat.beroep) || null;
 
+// Elke route eindigt met werk: na het praktijkonderwijs, het mbo, het hbo of de universiteit komt het bijbehorende
+// Werk-vakje als laatste stap. In de database staan alleen de opleidingsstappen; dit vult het aan.
+const WERK_NA_OPLEIDING = {
+  pro: 'werk', mbo1: 'werk-mbo', mbo2: 'werk-mbo', mbo3: 'werk-mbo', mbo4: 'werk-mbo', hbo: 'werk-hbo', wo: 'werk-wo',
+};
+
+function metWerk(stappen) {
+  const laatste = stappen[stappen.length - 1];
+  const werk = WERK_NA_OPLEIDING[laatste];
+  return werk ? [...stappen, werk] : stappen;
+}
+
 // De gekozen route als lijst van onderdelen (na de basisschool).
 function huidigeRoute() {
   const beroep = huidigBeroep();
   const route = beroep?.routes[staat.route];
-  return route ? route.stappen : null;
+  return route ? metWerk(route.stappen) : null;
 }
 
 const omschrijving = (id) => staat.omschrijvingen[id] || STANDAARD_OMSCHRIJVING[id] || '';
@@ -488,7 +500,7 @@ function tekenBeroep(beroep) {
       }, `Route ${i + 1}`),
       h('div', { class: 'keten' },
         // Pijltje en stap blijven samen op één regel, zodat een pijltje nooit alleen aan het eind van een regel staat.
-        ...route.stappen.map((stap, n) => h('span', { class: 'schakel' },
+        ...metWerk(route.stappen).map((stap, n) => h('span', { class: 'schakel' },
           n > 0 && pijltje(),
           h('button', {
             type: 'button', class: 'stap', style: paletStijl(stap), onclick: () => kiesStap(i, stap),
