@@ -5,7 +5,7 @@
   --tekst-zacht: oklch(0.5 0.02 265);
   --lijn: oklch(0.91 0.01 85);
   --kop: oklch(0.24 0.04 265);
-  --amber: #b45309;
+  --amber: oklch(0.65 0.12 70);
   --straal: 22px;
   --font-tekst: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-kop: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
@@ -388,7 +388,7 @@ body.start {
 
 .werk-hint { margin: 0 0 12px !important; font-size: 15px; color: var(--tekst-zacht); }
 .beroep-chips { margin-bottom: 14px; }
-.beroep-chips .chip[aria-pressed="true"] { border-color: var(--amber); background: oklch(0.97 0.03 80); }
+.beroep-chips .chip[aria-pressed="true"] { border-color: oklch(0.82 0.07 75); background: oklch(0.985 0.015 85); }
 .scholen .sectie-titel { margin-top: 4px; }
 
 .leeg, .demo, .fout { color: var(--tekst-zacht); font-size: .9rem; }
@@ -404,57 +404,89 @@ body.start {
 /* ---------- Beroep en routes ---------- */
 
 .beroep { display: flex; flex-direction: column; gap: 12px; }
-.beroep h2 { color: #92400e; }
+.beroep h2 { margin-top: -6px; }
 .route-uitleg { margin: 0 !important; font-size: 15px; color: var(--tekst-zacht); }
-.routes { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.routes { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+
+/* een route: een zachte kaart met de stappen als pillen */
 .route {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 5px 6px;
-  padding: 6px 8px;
-  border: 2px solid transparent;
-  border-radius: 12px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--lijn);
+  border-radius: 16px;
+  background: #fff;
+  transition: background .2s, border-color .2s, box-shadow .2s;
 }
-.route[data-gekozen="true"] { border-color: #f59e0b; background: #fffbeb; }
+.route[data-gekozen="true"] {
+  border-color: oklch(0.86 0.05 75);
+  background: oklch(0.987 0.012 85);
+  box-shadow: 0 0 0 3px oklch(0.95 0.03 80);
+}
 .route-knop {
-  font: inherit;
-  font-size: .8rem;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 12px;
   font-weight: 700;
-  padding: 2px 10px;
-  border-radius: 999px;
-  border: 1px solid #94a3b8;
-  background: var(--kaart);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: oklch(0.55 0.02 265);
   cursor: pointer;
 }
-.route-knop[aria-pressed="true"] { background: var(--amber); border-color: var(--amber); color: #fff; }
-.pijltje { color: var(--tekst-zacht); font-weight: 700; }
+.route-knop::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid oklch(0.72 0.02 265);
+}
+.route-knop[aria-pressed="true"] { color: oklch(0.38 0.08 70); }
+.route-knop[aria-pressed="true"]::before { background: var(--amber); border-color: var(--amber); }
+
+.keten { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 6px; }
+.schakel { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.pijltje { color: oklch(0.72 0.02 265); font-size: 14px; }
+
 .stap {
-  font: inherit;
-  font-size: .85rem;
-  font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 11px 3px 4px;
-  border: 0;
+  gap: 7px;
+  padding: 4px 12px 4px 5px;
+  border: 1.5px solid var(--line);
   border-radius: 999px;
-  background: var(--kleur, #475569);
-  color: #fff;
+  background: var(--tint);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
+  transition: border-color .15s, background .15s;
 }
+.stap:hover { border-color: var(--solid); background: #fff; }
 .stap b {
   display: inline-grid;
   place-items: center;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--amber);
-  border: 2px solid #fff;
-  font-size: .72rem;
+  background: var(--solid);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
 }
-.stap:hover { filter: brightness(1.12); }
-.stap.eind { background: #fff; color: #92400e; border: 2px solid var(--amber); padding: 1px 12px; cursor: default; font-weight: 800; }
+.stap.eind {
+  padding: 4px 14px;
+  background: #fff;
+  border-color: var(--lijn);
+  color: var(--tekst);
+  font-weight: 800;
+  cursor: default;
+}
 
 /* ---------- Schema ---------- */
 
@@ -525,13 +557,13 @@ body.start {
 #schema .pijl-label rect { fill: oklch(0.25 0.04 265); stroke: #fff; stroke-width: 2; }
 #schema .pijl-label text { fill: #fff; font-size: 12px; font-weight: 700; }
 
-/* routes naar een beroep */
-#schema .blok.op-route > .vorm { stroke: #f59e0b; stroke-width: 6; }
-#schema .blok.actief.op-route > .vorm { stroke: var(--deep); stroke-width: 1.5; }
-#schema .blok.gedimd { opacity: .35; }
-#schema.heeft-route .pijl:not(.route):not(.actief) { opacity: .15; }
-#schema .pijl.route { opacity: 1; stroke: var(--amber); stroke-width: 5; marker-end: url(#kop-route); }
-#schema .stapnummer circle { fill: var(--amber); stroke: #fff; stroke-width: 3; }
+/* routes naar een beroep: dezelfde zachte stijl als de rest; de stappen worden vol van kleur */
+#schema .blok.op-route > .vorm { fill: var(--solid); stroke: var(--deep); stroke-width: 1.5; }
+#schema .blok.op-route > text { fill: #fff; }
+#schema .blok.gedimd { opacity: .28; }
+#schema.heeft-route .pijl:not(.route):not(.actief) { opacity: .16; }
+#schema .pijl.route { opacity: 1; stroke: oklch(0.25 0.04 265); stroke-width: 3.2; marker-end: url(#kop-donker); }
+#schema .stapnummer circle { fill: oklch(0.25 0.04 265); stroke: #fff; stroke-width: 2; }
 #schema .stapnummer text { fill: #fff; font-family: var(--font-kop); }
 
 /* ---------- Kleinere schermen: kaart boven, informatie eronder ---------- */

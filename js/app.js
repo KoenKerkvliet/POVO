@@ -156,7 +156,7 @@ function maakBlok(def, extra = []) {
 function tekenSchema() {
   schemaEl.setAttribute('viewBox', SCHEMA_VIEWBOX);
   const defs = svg('defs', {},
-    ...[['kop-grijs', 'oklch(0.68 0.025 265)', 10], ['kop-donker', 'oklch(0.25 0.04 265)', 12], ['kop-route', 'oklch(0.5 0.12 60)', 13]]
+    ...[['kop-grijs', 'oklch(0.68 0.025 265)', 10], ['kop-donker', 'oklch(0.25 0.04 265)', 12]]
       .map(([id, kleur, grootte]) =>
         svg('marker', {
           id, viewBox: '0 0 10 10', refX: 7, refY: 5, markerWidth: grootte, markerHeight: grootte,
@@ -305,8 +305,8 @@ function tekenRoute() {
   const nummers = (route || []).map((bid, i) => {
     const hoek = hoekVan(bid);
     return hoek && svg('g', { class: 'stapnummer', transform: `translate(${hoek.x} ${hoek.y})` },
-      svg('circle', { r: 15 }),
-      svg('text', { y: 6, 'text-anchor': 'middle', 'font-size': 17, 'font-weight': 800 }, String(i + 1)));
+      svg('circle', { r: 12 }),
+      svg('text', { y: 5, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 800 }, String(i + 1)));
   });
   schemaEl.querySelector('.stapnummers').replaceChildren(...nummers.filter(Boolean));
 }
@@ -477,25 +477,27 @@ function vulBeroepKeuze() {
 }
 
 function tekenBeroep(beroep) {
+  const pijltje = () => h('span', { class: 'pijltje', 'aria-hidden': 'true' }, '→');
+
   const routes = beroep.routes.map((route, i) => {
-    const stappen = route.stappen;
-    return h('li', { class: 'route', 'data-gekozen': String(i === staat.route) },
+    const gekozen = i === staat.route;
+    return h('li', { class: 'route', 'data-gekozen': String(gekozen) },
       h('button', {
-        type: 'button', class: 'route-knop', 'aria-pressed': String(i === staat.route),
+        type: 'button', class: 'route-knop', 'aria-pressed': String(gekozen),
         onclick: () => { staat.route = i; werkSchemaBij(); tekenPaneel(); },
       }, `Route ${i + 1}`),
-      ...stappen.flatMap((stap, n) => [
-        n > 0 && h('span', { class: 'pijltje', 'aria-hidden': 'true' }, '→'),
-        h('button', {
-          type: 'button', class: 'stap', style: `--kleur: ${NIVEAU_INFO[stap].kleur}`,
-          onclick: () => kiesStap(i, stap),
-        }, h('b', {}, String(n + 1)), NIVEAU_INFO[stap].kort),
-      ]),
-      h('span', { class: 'pijltje', 'aria-hidden': 'true' }, '→'),
-      h('span', { class: 'stap eind' }, beroep.naam));
+      h('div', { class: 'keten' },
+        // Pijltje en stap blijven samen op één regel, zodat een pijltje nooit alleen aan het eind van een regel staat.
+        ...route.stappen.map((stap, n) => h('span', { class: 'schakel' },
+          n > 0 && pijltje(),
+          h('button', {
+            type: 'button', class: 'stap', style: paletStijl(stap), onclick: () => kiesStap(i, stap),
+          }, h('b', {}, String(n + 1)), NIVEAU_INFO[stap].kort))),
+        h('span', { class: 'schakel' }, pijltje(), h('span', { class: 'stap eind' }, beroep.naam))));
   });
 
-  return h('div', { class: 'beroep' },
+  return h('div', { class: 'beroep', style: paletStijl('werk') },
+    h('span', { class: 'kleurbalk' }),
     h('div', { class: 'label' }, 'Beroep'),
     h('h2', {}, beroep.naam),
     beroep.omschrijving && h('p', { class: 'uitleg' }, beroep.omschrijving),
