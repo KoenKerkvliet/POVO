@@ -605,6 +605,64 @@ body.start {
 }
 .topbalk h1 { margin: 0; font-size: 1.6rem; }
 
+/* ---------- Printen of opslaan als pdf ---------- */
+
+/* Op het scherm zijn de print-onderdelen verborgen. */
+.print-kop, .print-uitleg, .print-voet { display: none; }
+
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    transition: none !important;
+    animation: none !important;
+  }
+  html, body { background: #fff !important; }
+  body.start { display: block; height: auto; overflow: visible; }
+
+  .kop, .kleurstreep, .paneel, .info-kaart { display: none !important; }
+
+  /* Kop met titel */
+  .print-kop { display: flex; align-items: center; gap: 4mm; height: 12mm; margin-bottom: 2mm; }
+  .print-kop .logo { width: 9mm; height: 9mm; flex: none; }
+  .print-kop h1 { margin: 0; font-size: 19pt; line-height: 1; }
+  .print-kop p { margin: 1mm 0 0; font-size: 9pt; color: #475569; }
+
+  /* Het schema (links) en de uitleg (rechts), samen op één liggend A4 */
+  .canvas { display: grid; grid-template-columns: 200mm minmax(0, 1fr); gap: 7mm; padding: 0; align-items: start; }
+  .kaart { width: 200mm; height: 160mm; overflow: hidden; }
+  #schema { width: 100%; height: 100%; }
+
+  .print-uitleg { display: block; font-size: 8.5pt; line-height: 1.4; color: #1e293b; }
+  .print-uitleg h2 { margin: 0 0 2mm; font-size: 11.5pt; line-height: 1.15; }
+  .print-uitleg h3 { margin: 4mm 0 1.5mm; font-size: 9.5pt; line-height: 1.2; }
+  .print-lijst { margin: 0; padding-left: 4mm; }
+  .print-lijst li { margin-bottom: 1.5mm; }
+  .print-legenda { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1mm 3mm; }
+  .print-legenda li { display: flex; align-items: center; gap: 1.5mm; }
+  .print-stip { width: 3mm; height: 3mm; border-radius: 0.8mm; flex: none; }
+
+  .print-gekozen { margin-top: 5mm; padding-top: 3mm; border-top: 0.3mm solid #cbd5e1; }
+  .print-gekozen p { margin: 0 0 1.5mm; }
+  .print-gekozen .print-duur { color: #475569; }
+  .print-routes { margin: 1mm 0 0; padding-left: 4.5mm; }
+  .print-routes li { margin-bottom: 1.2mm; }
+
+  .print-voet {
+    display: flex;
+    justify-content: space-between;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    font-size: 7.5pt;
+    color: #64748b;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }

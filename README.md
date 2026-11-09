@@ -46,6 +46,10 @@ Het zijn alleen statische bestanden. Je kunt de map bijvoorbeeld met GitHub Page
 
 De plaatjes staan verkleind in `img/` (WebP). Je originelen in `beelden/` gaan niet mee naar GitHub. Een nieuw plaatje maak je klein met bijvoorbeeld 400 pixels breed (staand) of 600 pixels breed (liggend) en zet je in `img/`. De koppeling met een niveau staat in `js/schema-data.js` (`AFBEELDINGEN`).
 
+## Printen of opslaan als pdf
+
+De knop met het printer-icoon in de kop (of Ctrl+P) maakt een liggend A4 van het schema, met uitleg en kleuren ernaast. Kies in het printvenster *Opslaan als pdf* om het te bewaren. Is er een beroep of kaart gekozen, dan staat die uitleg mee op de print.
+
 ## Lettertypen
 
 De site gebruikt *Atkinson Hyperlegible* en *Bricolage Grotesque*. Beide staan in de map `fonts/` (vrij te gebruiken onder de SIL Open Font License), dus bezoekers maken geen verbinding met Google.

@@ -14,6 +14,10 @@ const beroepKeuzeEl = document.querySelector('#beroep-keuze');
 const beroepSelectEl = document.querySelector('#beroep-select');
 const infoKnopEl = document.querySelector('#info-knop');
 const infoEl = document.querySelector('#info');
+const printKnopEl = document.querySelector('#print-knop');
+const printLegendaEl = document.querySelector('#print-legenda');
+const printGekozenEl = document.querySelector('#print-gekozen');
+const printDatumEl = document.querySelector('#print-datum');
 
 // Welke scholen uitgeklapt zijn, onthouden we in de browser (standaard is alles ingeklapt).
 const OPEN_SLEUTEL = 'povo-open-scholen';
@@ -640,6 +644,46 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ---------- Printen of opslaan als pdf ----------
+
+// Kleuren onderaan de uitleg op de print.
+function vulPrintLegenda() {
+  const items = [
+    ['pro', 'Praktijkonderwijs'], ['vmbo', 'Vmbo'], ['havo', 'Havo'], ['vwo', 'Vwo'],
+    ['mbo', 'Mbo'], ['hbo', 'Hbo'], ['wo', 'Wo (universiteit)'], ['werk', 'Werk'],
+  ];
+  printLegendaEl.replaceChildren(...items.map(([id, naam]) =>
+    h('li', {}, h('span', { class: 'print-stip', style: `background: ${NIVEAU_INFO[id].kleur}` }), naam)));
+}
+
+// Het gekozen beroep (met zijn routes) of de gekozen kaart komt mee op de print.
+function vulPrintGekozen() {
+  const beroep = huidigBeroep();
+  const id = staat.gekozen;
+  const delen = [];
+
+  if (beroep) {
+    delen.push(h('h3', {}, `Beroep: ${beroep.naam}`));
+    if (beroep.omschrijving) delen.push(h('p', {}, beroep.omschrijving));
+    delen.push(h('ol', { class: 'print-routes' }, ...beroep.routes.map((route) =>
+      h('li', {}, [...metWerk(route.stappen).map((stap) => NIVEAU_INFO[stap].kort), beroep.naam].join(' \u2192 ')))));
+  }
+  if (id) {
+    const info = NIVEAU_INFO[id];
+    delen.push(h('h3', {}, info.titel || info.naam));
+    if (info.duur) delen.push(h('p', { class: 'print-duur' }, `Duur: ${info.duur}`));
+    delen.push(h('p', {}, omschrijving(id)));
+  }
+  printGekozenEl.replaceChildren(...delen);
+  printGekozenEl.hidden = delen.length === 0;
+}
+
+window.addEventListener('beforeprint', () => {
+  printDatumEl.textContent = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+  vulPrintGekozen();
+});
+printKnopEl.addEventListener('click', () => window.print());
+
 beroepSelectEl.addEventListener('change', () => kiesBeroep(beroepSelectEl.value));
 document.querySelectorAll('[data-regio]').forEach((el) => { el.textContent = REGIO; });
 
@@ -658,6 +702,7 @@ schemaEl.addEventListener('keydown', (e) => {
 });
 
 tekenSchema();
+vulPrintLegenda();
 tekenPaneel();
 
 laadGegevens()
