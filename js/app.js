@@ -89,7 +89,7 @@ function zetSchoolOpen(id, open) {
 }
 
 const staat = {
-  gekozen: null, plaats: null, scholen: [], omschrijvingen: {}, demo: false,
+  momentopname: null, gekozen: null, plaats: null, scholen: [], omschrijvingen: {}, demo: false,
   beroepen: [], beroep: null, route: 0, alleenTweetalig: false, openScholen: laadOpenScholen(), scholenOpen: laadScholenSectieOpen(), werkOpen: laadWerkSectieOpen(),
 };
 
@@ -600,6 +600,10 @@ function tekenWerkBeroepen(id) {
     ...inhoud));
 }
 
+function momentopnameDatum() {
+  return new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(staat.momentopname));
+}
+
 function tekenPaneel() {
   const id = staat.gekozen;
   const beroep = huidigBeroep();
@@ -620,7 +624,9 @@ function tekenPaneel() {
 
   paneelEl.replaceChildren(
     ...delen.map((deel) => h('section', { class: 'paneel-deel' }, deel)),
-    ...(staat.demo ? [h('p', { class: 'demo' }, 'Voorbeeldgegevens: Supabase is nog niet gekoppeld.')] : []));
+    ...(staat.demo ? [h('p', { class: 'demo' }, 'Voorbeeldgegevens: Supabase is nog niet gekoppeld.')] : []),
+    // Alleen in het losse bestand: zonder internet zie je de gegevens van de dag dat het bestand gemaakt is.
+    ...(staat.momentopname ? [h('p', { class: 'demo' }, `Geen verbinding: je ziet de gegevens van ${momentopnameDatum()}.`)] : []));
 }
 
 // ---------- Info-icoon in de kop ----------

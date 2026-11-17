@@ -46,6 +46,18 @@ Het zijn alleen statische bestanden. Je kunt de map bijvoorbeeld met GitHub Page
 
 De plaatjes staan verkleind in `img/` (WebP). Je originelen in `beelden/` gaan niet mee naar GitHub. Een nieuw plaatje maak je klein met bijvoorbeeld 400 pixels breed (staand) of 600 pixels breed (liggend) en zet je in `img/`. De koppeling met een niveau staat in `js/schema-data.js` (`AFBEELDINGEN`).
 
+## Losse versie (één html-bestand)
+
+`losse-versie/na-de-basisschool.html` is de hele site in één bestand: opmaak, code, lettertypen, plaatjes en een kopie van de scholen en beroepen. Je kunt het mailen, op een usb-stick zetten of zonder internet openen. Met internet haalt het eerst de actuele gegevens uit Supabase op; zonder internet gebruikt het de ingebakken kopie en zegt dat erbij. Het dashboard zit er niet in.
+
+Het bestand wordt niet vanzelf bijgewerkt. Na een wijziging aan scholen, beroepen of de site maak je het opnieuw (Node 18 of nieuwer):
+
+```bash
+node scripts/maak-losse-pagina.mjs
+```
+
+Commit daarna het bestand en push. Op de site staat een downloadlink in het uitlegvenster (de i-knop).
+
 ## Printen of opslaan als pdf
 
 De knop met het printer-icoon in de kop (of Ctrl+P) maakt een liggend A4 van het schema, met uitleg en kleuren ernaast. Kies in het printvenster *Opslaan als pdf* om het te bewaren. Is er een beroep of kaart gekozen, dan staat die uitleg mee op de print.
