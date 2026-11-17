@@ -6,4 +6,4 @@
 export const SUPABASE_URL = 'https://xhknffejwixbbbsejour.supabase.co';
 export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhoa25mZmVqd2l4YmJic2Vqb3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2NDg1MDYsImV4cCI6MjEwOTIyNDUwNn0.4p7Pr9J2Id9twy7t3DcyKdHe8u2yGwFAhob19B0q4Yo';
 
-export const REGIO = 'Zuid-Limburg';
+export const REGIO = 'Parkstad';

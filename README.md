@@ -1,6 +1,6 @@
 # Na de basisschool: doorstroomschema voor de klas
 
-Een interactief schema met de wegen na de basisschool. Klik op pr.o., vmbo (of een leerweg), havo of vwo en je ziet de scholen in Zuid-Limburg die dat aanbieden. Scholen beheer je zelf in een dashboard.
+Een interactief schema met de wegen na de basisschool. Klik op pr.o., vmbo (of een leerweg), havo of vwo en je ziet de scholen in Parkstad die dat aanbieden. Scholen beheer je zelf in een dashboard.
 
 - `index.html`: het schema voor de kinderen
 - `beheer.html`: het dashboard voor jou (inloggen vereist)
