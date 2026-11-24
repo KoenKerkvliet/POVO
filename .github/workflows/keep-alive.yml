@@ -1,0 +1,47 @@
+name: Supabase wakker houden
+
+# Een gratis Supabase-project pauzeert na ongeveer 7 dagen zonder activiteit.
+# Deze workflow vraagt om de 3 dagen één rij op, zodat het project actief blijft.
+# De URL en sleutel komen uit js/config.js, dus er is maar één plek om bij te werken.
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Roep de database aan
+        run: |
+          URL=$(grep -oP "SUPABASE_URL\s*=\s*'\K[^']+" js/config.js)
+          KEY=$(grep -oP "SUPABASE_ANON_KEY\s*=\s*'\K[^']+" js/config.js)
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then
+            echo "Geen URL of sleutel gevonden in js/config.js"; exit 1
+          fi
+          # --fail: bij een fout (bijvoorbeeld een gepauzeerd project) mislukt de run en krijg je een mail van GitHub
+          curl --fail --silent --show-error --max-time 30 --retry 3 \
+            "$URL/rest/v1/niveaus?select=id&limit=1" \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY"
+          echo
+
+      # GitHub zet geplande workflows in openbare repo's uit na 60 dagen zonder commits.
+      # Is de laatste commit ouder dan 45 dagen, dan maken we een lege commit.
+      - name: Houd de workflow zelf actief
+        run: |
+          LAATSTE=$(git log -1 --format=%ct)
+          NU=$(date +%s)
+          if [ $(( (NU - LAATSTE) / 86400 )) -ge 45 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "Houd de geplande workflow actief"
+            git push
+          else
+            echo "Laatste commit is recent genoeg."
+          fi

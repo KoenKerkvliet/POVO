@@ -42,6 +42,10 @@ en open http://localhost:5173.
 
 Het zijn alleen statische bestanden. Je kunt de map bijvoorbeeld met GitHub Pages, Netlify of Vercel publiceren; er is geen build-stap nodig.
 
+## Supabase wakker houden
+
+Een gratis Supabase-project pauzeert na ongeveer 7 dagen zonder activiteit. `.github/workflows/keep-alive.yml` roept daarom om de 3 dagen de database aan (URL en sleutel komen uit `js/config.js`). Mislukt de aanroep, bijvoorbeeld omdat het project toch gepauzeerd is, dan krijg je een mail van GitHub. Je kunt de workflow ook handmatig starten via GitHub > Actions > *Supabase wakker houden* > *Run workflow*. Is het project toch gepauzeerd, dan zet je het binnen 90 dagen weer aan via het Supabase-dashboard (*Restore project*).
+
 ## Afbeeldingen van leerlingen
 
 De plaatjes staan verkleind in `img/` (WebP). Je originelen in `beelden/` gaan niet mee naar GitHub. Een nieuw plaatje maak je klein met bijvoorbeeld 400 pixels breed (staand) of 600 pixels breed (liggend) en zet je in `img/`. De koppeling met een niveau staat in `js/schema-data.js` (`AFBEELDINGEN`).
